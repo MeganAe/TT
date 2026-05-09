@@ -1,1 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AlertBukavu — Alertes en cours</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+  body { font-family:'Inter',sans-serif; background:#F7F8FF; padding-bottom:80px; }
+  .ms { font-family:'Material Symbols Outlined'; }
+  .live-pulse { animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.2)} }
+  .card { background:white; border-radius:16px; border:1px solid #E5E7EB;
+    box-shadow:0 2px 12px rgba(61,90,254,.06); overflow:hidden;
+    transition:box-shadow .2s, transform .2s; }
+  .card:hover { box-shadow:0 6px 24px rgba(61,90,254,.12); transform:translateY(-2px); }
+  .filter-btn { padding:8px 18px; border-radius:100px; font-size:13px; font-weight:600;
+    cursor:pointer; border:1.5px solid #E5E7EB; background:white; color:#6B7280;
+    white-space:nowrap; transition:all .2s; }
+  .filter-btn.active { background:#183ce6; color:white; border-color:#183ce6; }
+  .filter-btn:hover:not(.active) { background:#EEF0FF; border-color:#183ce6; color:#183ce6; }
+  .badge { padding:3px 10px; border-radius:6px; font-size:10px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.05em; }
+  .btn-confirm { flex:1; padding:10px; border-radius:10px; font-size:13px; font-weight:600;
+    cursor:pointer; border:none; background:#E6FAF5; color:#00C48C; transition:all .2s;
+    display:flex; align-items:center; justify-content:center; gap:6px; }
+  .btn-confirm:hover { background:#c8f5e9; }
+  .btn-signal { padding:10px 16px; border-radius:10px; font-size:13px; font-weight:600;
+    cursor:pointer; border:none; background:#FFF0F5; color:#FF3D71; transition:all .2s;
+    display:flex; align-items:center; justify-content:center; gap:6px; }
+  .btn-signal:hover { background:#ffd6e4; }
+  .fab { position:fixed; bottom:90px; right:20px; width:56px; height:56px;
+    background:#183ce6; color:white; border-radius:50%; border:none; cursor:pointer;
+    box-shadow:0 4px 20px rgba(24,60,230,.4); display:flex; align-items:center;
+    justify-content:center; font-size:28px; transition:transform .2s; z-index:50; }
+  .fab:hover { transform:scale(1.1); }
+  .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:white;
+    border-top:1px solid #E5E7EB; display:flex; z-index:40;
+    box-shadow:0 -2px 12px rgba(61,90,254,.06); }
+  .nav-item { flex:1; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; padding:10px 0; text-decoration:none; color:#9CA3AF;
+    font-size:11px; font-weight:600; gap:3px; transition:color .2s; }
+  .nav-item.active { color:#183ce6; }
+  .nav-item .ms { font-size:22px; }
+  .empty-state { text-align:center; padding:60px 20px; }
+  .skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
+    background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:8px; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .card-anim { animation:slideUp .35s ease both; }
+  @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .no-scrollbar::-webkit-scrollbar { display:none; }
+</style>
+</head>
+<body>
 
+<!-- Header -->
+<header style="background:white;border-bottom:1px solid #E5E7EB;position:sticky;top:0;z-index:40;box-shadow:0 2px 8px rgba(61,90,254,.05);">
+  <div style="max-width:900px;margin:0 auto;padding:0 16px;height:64px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:36px;height:36px;background:linear-gradient(135deg,#3D5AFE,#2739C7);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+        <span class="ms text-white" style="font-size:18px;color:white;">shield</span>
+      </div>
+      <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:#1A1F36;">AlertBukavu</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="display:flex;align-items:center;gap:6px;background:#E6FAF5;padding:6px 12px;border-radius:100px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:#00C48C;" class="live-pulse"></span>
+        <span style="color:#00C48C;font-size:12px;font-weight:700;">EN DIRECT</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Contenu principal -->
+<main style="max-width:900px;margin:0 auto;padding:20px 16px;">
+
+  <!-- Titre + compteur -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:#1A1F36;">Alertes en cours</h1>
+    <span id="compteur" style="background:#EEF0FF;color:#183ce6;padding:3px 12px;border-radius:100px;font-size:13px;font-weight:700;">0</span>
+  </div>
+
+  <!-- Filtres -->
+  <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:16px;margin-bottom:20px;" class="no-scrollbar">
+    <button class="filter-btn active" data-cat="tous" onclick="filtrer(this,'tous')">Toutes</button>
+    <button class="filter-btn" data-cat="securite" onclick="filtrer(this,'securite')">Sécurité</button>
+    <button class="filter-btn" data-cat="eau" onclick="filtrer(this,'eau')">Eau</button>
+    <button class="filter-btn" data-cat="routes" onclick="filtrer(this,'routes')">Routes</button>
+    <button class="filter-btn" data-cat="sante" onclick="filtrer(this,'sante')">Santé</button>
+    <button class="filter-btn" data-cat="meteo" onclick="filtrer(this,'meteo')">Météo</button>
+  </div>
+
+  <!-- Grille alertes -->
+  <div id="alertesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+    <!-- Skeleton loaders -->
+    <div class="card" style="height:200px;"><div class="skeleton" style="height:100%;"></div></div>
+    <div class="card" style="height:200px;"><div class="skeleton" style="height:100%;"></div></div>
+    <div class="card" style="height:200px;"><div class="skeleton" style="height:100%;"></div></div>
+  </div>
+
+  <!-- État vide -->
+  <div id="emptyState" class="empty-state" style="display:none;">
+    <div style="width:64px;height:64px;background:#EEF0FF;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+      <span class="ms" style="font-size:28px;color:#183ce6;">notifications_none</span>
+    </div>
+    <p style="color:#1A1F36;font-weight:700;font-size:16px;margin-bottom:6px;">Aucune alerte</p>
+    <p style="color:#6B7280;font-size:14px;">Soyez le premier à signaler un problème</p>
+  </div>
+
+</main>
+
+<!-- FAB -->
+<button class="fab" onclick="window.location.href='publier.html'" title="Publier une alerte">
+  <span class="ms" style="color:white;font-size:26px;">add_alert</span>
+</button>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item active">
+    <span class="ms" style="font-variation-settings:'FILL' 1;">rss_feed</span>
+    <span>Alertes</span>
+  </a>
+  <a href="publier.html" class="nav-item">
+    <span class="ms">add_alert</span>
+    <span>Publier</span>
+  </a>
+  <a href="stats.html" class="nav-item">
+    <span class="ms">analytics</span>
+    <span>Stats</span>
+  </a>
+  <a href="profil.html" class="nav-item">
+    <span class="ms">person</span>
+    <span>Profil</span>
+  </a>
+</nav>
+
+<script src="firebase-config.js"></script>
+<script>
+let toutesLesAlertes = [];
+let filtreActuel = 'tous';
+let currentUser = null;
+
+// Auth + chargement
+auth.onAuthStateChanged(user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  currentUser = user;
+  chargerAlertes();
+});
+
+// Chargement temps réel Firestore
+function chargerAlertes() {
+  db.collection('alertes')
+    .where('statut', '!=', 'suspendue')
+    .orderBy('statut')
+    .orderBy('createdAt', 'desc')
+    .limit(50)
+    .onSnapshot(snapshot => {
+      toutesLesAlertes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      afficherAlertes();
+    }, err => {
+      // Fallback sans filtre statut si l'index n'existe pas encore
+      db.collection('alertes')
+        .orderBy('createdAt', 'desc')
+        .limit(50)
+        .onSnapshot(snapshot => {
+          toutesLesAlertes = snapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(a => a.statut !== 'suspendue');
+          afficherAlertes();
+        });
+    });
+}
+
+function filtrer(btn, cat) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filtreActuel = cat;
+  afficherAlertes();
+}
+
+function afficherAlertes() {
+  const grid = document.getElementById('alertesGrid');
+  const empty = document.getElementById('emptyState');
+
+  let liste = toutesLesAlertes;
+  if (filtreActuel !== 'tous') {
+    liste = liste.filter(a => a.categorie === filtreActuel);
+  }
+
+  document.getElementById('compteur').textContent = liste.length;
+
+  if (liste.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = liste.map((a, i) => cardHTML(a, i)).join('');
+}
+
+function cardHTML(a, index) {
+  const cat = CATEGORIES[a.categorie] || CATEGORIES.autre;
+  const urg = URGENCES[a.niveauUrgence] || URGENCES.faible;
+  const temps = a.createdAt ? tempsRelatif(a.createdAt.toMillis()) : 'récent';
+  const borderColor = urg.border;
+  const delay = Math.min(index * 60, 300);
+
+  return `
+  <div class="card card-anim" style="border-left:4px solid ${borderColor};animation-delay:${delay}ms;">
+    <div style="padding:18px 18px 14px;">
+
+      <!-- Badges + temps -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span class="badge" style="background:${urg.badgeBg};color:${urg.border};">${urg.label}</span>
+        <span class="badge" style="background:${cat.bg};color:${cat.color};">${cat.label}</span>
+        <span style="margin-left:auto;color:#9CA3AF;font-size:11px;display:flex;align-items:center;gap:3px;">
+          <span class="ms" style="font-size:13px;">schedule</span>${temps}
+        </span>
+      </div>
+
+      <!-- Titre -->
+      <h3 style="font-size:15px;font-weight:700;color:#1A1F36;margin-bottom:6px;line-height:1.4;">${escHtml(a.titre)}</h3>
+
+      <!-- Description -->
+      <p style="font-size:13px;color:#6B7280;margin-bottom:12px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escHtml(a.description)}</p>
+
+      <!-- Quartier + confirmations -->
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:12px;color:#6B7280;display:flex;align-items:center;gap:4px;">
+          <span class="ms" style="font-size:14px;color:#183ce6;">location_on</span>${escHtml(a.quartier)}
+        </span>
+        <span style="font-size:12px;color:#6B7280;">${a.nbConfirmations || 0} confirmation${(a.nbConfirmations||0)>1?'s':''}</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="border-top:1px solid #F3F4F6;padding:12px 18px;display:flex;gap:10px;">
+      <button class="btn-confirm" onclick="confirmer('${a.id}')">
+        <span class="ms" style="font-size:16px;">check_circle</span>Confirmer
+      </button>
+      <button class="btn-signal" onclick="signaler('${a.id}')">
+        <span class="ms" style="font-size:16px;">flag</span>Signaler
+      </button>
+    </div>
+  </div>`;
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function confirmer(alerteId) {
+  if (!currentUser) { showToast('Connectez-vous pour confirmer','error'); return; }
+
+  const confirmRef = db.collection('confirmations').doc(`${alerteId}_${currentUser.uid}`);
+  const exists = await confirmRef.get();
+
+  if (exists.exists) {
+    showToast('Vous avez déjà confirmé cette alerte','info');
+    return;
+  }
+
+  const batch = db.batch();
+  const alerteRef = db.collection('alertes').doc(alerteId);
+
+  batch.set(confirmRef, { alerteId, userId: currentUser.uid, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  batch.update(alerteRef, { nbConfirmations: firebase.firestore.FieldValue.increment(1) });
+
+  await batch.commit();
+
+  // Auto-confirmer si >= 3
+  const alerteDoc = await alerteRef.get();
+  if (alerteDoc.data().nbConfirmations >= 3 && alerteDoc.data().statut === 'en_attente') {
+    await alerteRef.update({ statut: 'confirmee' });
+  }
+
+  showToast('Confirmation enregistrée');
+}
+
+async function signaler(alerteId) {
+  if (!currentUser) { showToast('Connectez-vous pour signaler','error'); return; }
+
+  const alerteRef = db.collection('alertes').doc(alerteId);
+  await alerteRef.update({ nbSignalements: firebase.firestore.FieldValue.increment(1) });
+
+  const doc = await alerteRef.get();
+  if (doc.data().nbSignalements >= 5) {
+    await alerteRef.update({ statut: 'suspendue' });
+    showToast('Alerte suspendue après signalements', 'info');
+  } else {
+    showToast('Alerte signalée, merci');
+  }
+}
+</script>
+</body>
+</html>

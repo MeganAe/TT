@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AlertBukavu — Publier une alerte</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+  body { font-family:'Inter',sans-serif; background:#F7F8FF; padding-bottom:80px; }
+  .ms { font-family:'Material Symbols Outlined'; }
+  .card { background:white; border-radius:16px; border:1px solid #E5E7EB; padding:20px; margin-bottom:14px; box-shadow:0 2px 8px rgba(61,90,254,.05); }
+  .label { display:block;font-weight:600;font-size:13px;color:#1A1F36;margin-bottom:10px; }
+  .input-field { height:52px;border:1.5px solid #E5E7EB;border-radius:12px;padding:0 16px;font-size:15px;width:100%;outline:none;background:white;transition:border-color .2s;box-sizing:border-box;font-family:'Inter',sans-serif; }
+  .input-field:focus { border-color:#183ce6;box-shadow:0 0 0 3px rgba(24,60,230,.08); }
+  textarea.input-field { height:110px;padding:14px 16px;resize:none; }
+  .select-field { height:52px;border:1.5px solid #E5E7EB;border-radius:12px;padding:0 16px;font-size:15px;width:100%;outline:none;background:white;appearance:none;cursor:pointer;font-family:'Inter',sans-serif;box-sizing:border-box; }
+  .select-field:focus { border-color:#183ce6; }
+  .cat-btn { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    padding:14px 8px;border-radius:12px;border:1.5px solid #E5E7EB;background:white;
+    cursor:pointer;transition:all .2s;font-size:12px;font-weight:600;color:#6B7280; }
+  .cat-btn .ms { font-size:22px;color:#9CA3AF; }
+  .cat-btn.active { border-color:#183ce6;background:#EEF0FF;color:#183ce6; }
+  .cat-btn.active .ms { color:#183ce6; }
+  .cat-btn:hover:not(.active) { border-color:#c5c5d9;background:#F7F8FF; }
+  .urg-btn { flex:1;padding:12px;border-radius:12px;border:1.5px solid #E5E7EB;
+    background:white;cursor:pointer;font-size:13px;font-weight:700;transition:all .2s;text-align:center; }
+  .urg-btn.faible.active { border-color:#00C48C;background:#E6FAF5;color:#00C48C; }
+  .urg-btn.moyen.active { border-color:#FF9F43;background:#FFF5EC;color:#FF9F43; }
+  .urg-btn.critique.active { border-color:#FF3D71;background:#FFF0F5;color:#FF3D71; }
+  .urg-btn:hover:not(.active) { background:#F7F8FF; }
+  .btn-submit { width:100%;height:54px;background:#183ce6;color:white;border:none;
+    border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;
+    display:flex;align-items:center;justify-content:center;gap:8px; }
+  .btn-submit:hover { opacity:.9; }
+  .btn-submit:disabled { opacity:.6;cursor:not-allowed; }
+  .spinner { width:20px;height:20px;border:2.5px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .counter { font-size:11px;color:#9CA3AF;text-align:right;margin-top:4px; }
+  .bottom-nav { position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #E5E7EB;display:flex;z-index:40;box-shadow:0 -2px 8px rgba(61,90,254,.05); }
+  .nav-item { flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;text-decoration:none;color:#9CA3AF;font-size:11px;font-weight:600;gap:3px; }
+  .nav-item.active { color:#183ce6; }
+  .nav-item .ms { font-size:22px; }
+  .header { background:white;border-bottom:1px solid #E5E7EB;position:sticky;top:0;z-index:30; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div style="max-width:640px;margin:0 auto;padding:0 16px;height:64px;display:flex;align-items:center;gap:12px;">
+    <button onclick="history.back()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;color:#6B7280;padding:8px 0;">
+      <span class="ms" style="font-size:22px;">arrow_back</span>
+    </button>
+    <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:#1A1F36;">Publier une alerte</h1>
+  </div>
+</header>
+
+<main style="max-width:640px;margin:0 auto;padding:20px 16px;">
+
+  <!-- Titre -->
+  <div class="card">
+    <label class="label">Titre de l'alerte</label>
+    <input id="titre" type="text" class="input-field" placeholder="Ex: Route bloquée à Kadutu suite à un accident" maxlength="80"/>
+    <p class="counter"><span id="titreCount">0</span>/80</p>
+  </div>
+
+  <!-- Catégorie -->
+  <div class="card">
+    <label class="label">Catégorie</label>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;" id="catGrid">
+    </div>
+  </div>
+
+  <!-- Quartier + Urgence -->
+  <div class="card">
+    <label class="label">Quartier concerné</label>
+    <div style="position:relative;margin-bottom:20px;">
+      <select id="quartier" class="select-field">
+        <option value="">Choisir un quartier...</option>
+      </select>
+      <span class="ms" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#9CA3AF;pointer-events:none;font-size:18px;">expand_more</span>
+    </div>
+
+    <label class="label">Niveau d'urgence</label>
+    <div style="display:flex;gap:10px;">
+      <button class="urg-btn faible" onclick="selectUrgence(this,'faible')">Faible</button>
+      <button class="urg-btn moyen active" onclick="selectUrgence(this,'moyen')">Moyen</button>
+      <button class="urg-btn critique" onclick="selectUrgence(this,'critique')">Critique</button>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div class="card">
+    <label class="label">Description</label>
+    <textarea id="description" class="input-field" placeholder="Décrivez la situation avec précision pour aider la communauté..." maxlength="500"></textarea>
+    <p class="counter"><span id="descCount">0</span>/500</p>
+  </div>
+
+  <!-- Avertissement -->
+  <div style="background:#FFF0F5;border:1px solid #FF3D71;border-radius:14px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px;">
+    <span class="ms" style="color:#FF3D71;font-size:18px;margin-top:1px;">warning</span>
+    <p style="font-size:13px;color:#FF3D71;line-height:1.5;margin:0;">Toute fausse alerte entraîne la suspension de votre compte. Les alertes critiques sont transmises automatiquement aux autorités.</p>
+  </div>
+
+  <!-- Erreur -->
+  <div id="errorMsg" style="display:none;background:#FFF0F5;border:1px solid #FF3D71;border-radius:12px;padding:14px;margin-bottom:16px;color:#FF3D71;font-size:13px;"></div>
+
+  <!-- Bouton publier -->
+  <button id="btnPublier" class="btn-submit" onclick="publier()">
+    <span class="ms" style="font-size:20px;">add_alert</span>
+    Publier l'alerte
+  </button>
+
+</main>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="ms">rss_feed</span><span>Alertes</span>
+  </a>
+  <a href="publier.html" class="nav-item active">
+    <span class="ms" style="font-variation-settings:'FILL' 1;">add_alert</span><span>Publier</span>
+  </a>
+  <a href="stats.html" class="nav-item">
+    <span class="ms">analytics</span><span>Stats</span>
+  </a>
+  <a href="profil.html" class="nav-item">
+    <span class="ms">person</span><span>Profil</span>
+  </a>
+</nav>
+
+<script src="firebase-config.js"></script>
+<script>
+let categorieChoisie = '';
+let urgenceChoisie = 'moyen';
+let currentUser = null;
+
+auth.onAuthStateChanged(user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  currentUser = user;
+});
+
+// Remplir quartiers
+const sel = document.getElementById('quartier');
+QUARTIERS.forEach(q => {
+  const opt = document.createElement('option');
+  opt.value = q; opt.textContent = q;
+  sel.appendChild(opt);
+});
+
+// Générer grille catégories
+const catGrid = document.getElementById('catGrid');
+Object.entries(CATEGORIES).forEach(([key, cat]) => {
+  const btn = document.createElement('button');
+  btn.className = 'cat-btn';
+  btn.dataset.cat = key;
+  btn.innerHTML = `<span class="ms">${cat.icon}</span>${cat.label}`;
+  btn.onclick = () => selectCat(btn, key);
+  catGrid.appendChild(btn);
+});
+
+function selectCat(btn, key) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  categorieChoisie = key;
+}
+
+function selectUrgence(btn, val) {
+  document.querySelectorAll('.urg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  urgenceChoisie = val;
+}
+
+// Compteurs de caractères
+document.getElementById('titre').addEventListener('input', function() {
+  document.getElementById('titreCount').textContent = this.value.length;
+});
+document.getElementById('description').addEventListener('input', function() {
+  document.getElementById('descCount').textContent = this.value.length;
+});
+
+async function publier() {
+  const titre = document.getElementById('titre').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const quartier = document.getElementById('quartier').value;
+  const errorMsg = document.getElementById('errorMsg');
+  const btn = document.getElementById('btnPublier');
+
+  errorMsg.style.display = 'none';
+
+  if (!titre) { showErreur('Le titre est obligatoire.'); return; }
+  if (!categorieChoisie) { showErreur('Choisissez une catégorie.'); return; }
+  if (!quartier) { showErreur('Choisissez le quartier concerné.'); return; }
+  if (!description) { showErreur('La description est obligatoire.'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Publication en cours...';
+
+  function showErreur(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.style.display = 'block';
+  }
+
+  try {
+    // Récupérer le nom de l'utilisateur
+    let nomUser = currentUser.email;
+    try {
+      const userDoc = await db.collection('users').doc(currentUser.uid).get();
+      if (userDoc.exists && userDoc.data().nom) nomUser = userDoc.data().nom;
+    } catch(e) {}
+
+    // Publier l'alerte
+    await db.collection('alertes').add({
+      titre,
+      description,
+      categorie: categorieChoisie,
+      quartier,
+      niveauUrgence: urgenceChoisie,
+      statut: 'en_attente',
+      userId: currentUser.uid,
+      userNom: nomUser,
+      nbConfirmations: 0,
+      nbSignalements: 0,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Incrémenter compteur alertes utilisateur
+    db.collection('users').doc(currentUser.uid).update({
+      nbAlertes: firebase.firestore.FieldValue.increment(1)
+    }).catch(() => {});
+
+    showToast('Alerte publiée avec succès !');
+    setTimeout(() => window.location.href = 'index.html', 1200);
+
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="ms" style="font-size:20px;">add_alert</span> Publier l\'alerte';
+    showErreur('Erreur lors de la publication. Vérifiez votre connexion.');
+    console.error(e);
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AlertBukavu — Statistiques</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+  body { font-family:'Inter',sans-serif; background:#F7F8FF; padding-bottom:80px; }
+  .ms { font-family:'Material Symbols Outlined'; }
+  .card { background:white; border-radius:16px; border:1px solid #E5E7EB; padding:20px; box-shadow:0 2px 8px rgba(61,90,254,.05); }
+  .stat-card { background:white; border-radius:16px; border:1px solid #E5E7EB; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(61,90,254,.05); }
+  .stat-value { font-family:'Plus Jakarta Sans',sans-serif; font-size:36px; font-weight:800; line-height:1; margin-bottom:6px; }
+  .stat-label { font-size:12px; font-weight:600; color:#6B7280; text-transform:uppercase; letter-spacing:.05em; }
+  .progress-bar { height:8px; background:#EEF0FF; border-radius:100px; overflow:hidden; flex:1; }
+  .progress-fill { height:100%; border-radius:100px; transition:width .8s ease; }
+  .bottom-nav { position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #E5E7EB;display:flex;z-index:40;box-shadow:0 -2px 8px rgba(61,90,254,.05); }
+  .nav-item { flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;text-decoration:none;color:#9CA3AF;font-size:11px;font-weight:600;gap:3px; }
+  .nav-item.active { color:#183ce6; }
+  .nav-item .ms { font-size:22px; }
+  .skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px; }
+  @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header style="background:white;border-bottom:1px solid #E5E7EB;position:sticky;top:0;z-index:40;box-shadow:0 2px 8px rgba(61,90,254,.05);">
+  <div style="max-width:900px;margin:0 auto;padding:0 16px;height:64px;display:flex;align-items:center;gap:12px;">
+    <div style="width:36px;height:36px;background:linear-gradient(135deg,#3D5AFE,#2739C7);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+      <span class="ms" style="font-size:18px;color:white;">shield</span>
+    </div>
+    <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:#1A1F36;">Statistiques</h1>
+  </div>
+</header>
+
+<main style="max-width:900px;margin:0 auto;padding:20px 16px;">
+
+  <p style="color:#6B7280;font-size:14px;margin-bottom:24px;">Vue d'ensemble des alertes de Bukavu</p>
+
+  <!-- Grille stats -->
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;">
+    <div class="stat-card">
+      <span class="stat-value" id="statTotal" style="color:#183ce6;">—</span>
+      <span class="stat-label">Total alertes</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="statResolues" style="color:#00C48C;">—</span>
+      <span class="stat-label">Résolues</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="statCritiques" style="color:#FF3D71;">—</span>
+      <span class="stat-label">Critiques</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="statQuartier" style="color:#FF9F43;font-size:20px;">—</span>
+      <span class="stat-label">Zone active</span>
+    </div>
+  </div>
+
+  <!-- Répartition catégories -->
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:15px;font-weight:700;color:#1A1F36;margin-bottom:16px;">Répartition par catégorie</h2>
+    <div id="catStats" style="display:flex;flex-direction:column;gap:14px;">
+      <div class="skeleton" style="height:40px;"></div>
+      <div class="skeleton" style="height:40px;"></div>
+      <div class="skeleton" style="height:40px;"></div>
+    </div>
+  </div>
+
+  <!-- Répartition urgences -->
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:15px;font-weight:700;color:#1A1F36;margin-bottom:16px;">Répartition par urgence</h2>
+    <div id="urgStats" style="display:flex;flex-direction:column;gap:14px;"></div>
+  </div>
+
+  <!-- Top quartiers -->
+  <div class="card">
+    <h2 style="font-size:15px;font-weight:700;color:#1A1F36;margin-bottom:16px;">Top quartiers</h2>
+    <div id="quartierStats" style="display:flex;flex-direction:column;gap:12px;"></div>
+  </div>
+
+</main>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item"><span class="ms">rss_feed</span><span>Alertes</span></a>
+  <a href="publier.html" class="nav-item"><span class="ms">add_alert</span><span>Publier</span></a>
+  <a href="stats.html" class="nav-item active"><span class="ms" style="font-variation-settings:'FILL' 1;">analytics</span><span>Stats</span></a>
+  <a href="profil.html" class="nav-item"><span class="ms">person</span><span>Profil</span></a>
+</nav>
+
+<script src="firebase-config.js"></script>
+<script>
+auth.onAuthStateChanged(user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  chargerStats();
+});
+
+async function chargerStats() {
+  const snapshot = await db.collection('alertes').get();
+  const alertes = snapshot.docs.map(d => d.data());
+  const total = alertes.length;
+
+  let resolues = 0, critiques = 0;
+  const parCat = {}, parUrg = {}, parQuartier = {};
+
+  alertes.forEach(a => {
+    if (a.statut === 'resolue') resolues++;
+    if (a.niveauUrgence === 'critique') critiques++;
+    parCat[a.categorie] = (parCat[a.categorie] || 0) + 1;
+    parUrg[a.niveauUrgence] = (parUrg[a.niveauUrgence] || 0) + 1;
+    parQuartier[a.quartier] = (parQuartier[a.quartier] || 0) + 1;
+  });
+
+  // Stats principales
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statResolues').textContent = resolues;
+  document.getElementById('statCritiques').textContent = critiques;
+
+  // Quartier le plus actif
+  let topQ = '—', maxQ = 0;
+  Object.entries(parQuartier).forEach(([q, n]) => { if(n > maxQ) { maxQ = n; topQ = q; } });
+  document.getElementById('statQuartier').textContent = topQ;
+
+  // Catégories
+  const catDiv = document.getElementById('catStats');
+  catDiv.innerHTML = '';
+  Object.entries(CATEGORIES).forEach(([key, cat]) => {
+    const count = parCat[key] || 0;
+    const pct = total > 0 ? Math.round(count / total * 100) : 0;
+    catDiv.innerHTML += `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:13px;font-weight:600;color:#1A1F36;width:80px;">${cat.label}</span>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${pct}%;background:${cat.color};"></div>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:#6B7280;width:36px;text-align:right;">${count}</span>
+      </div>`;
+  });
+
+  // Urgences
+  const urgDiv = document.getElementById('urgStats');
+  urgDiv.innerHTML = '';
+  Object.entries(URGENCES).forEach(([key, urg]) => {
+    const count = parUrg[key] || 0;
+    const pct = total > 0 ? Math.round(count / total * 100) : 0;
+    urgDiv.innerHTML += `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:13px;font-weight:600;color:#1A1F36;width:80px;">${urg.label}</span>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${pct}%;background:${urg.border};"></div>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:#6B7280;width:36px;text-align:right;">${count}</span>
+      </div>`;
+  });
+
+  // Top quartiers
+  const qDiv = document.getElementById('quartierStats');
+  const sortedQ = Object.entries(parQuartier).sort((a,b) => b[1]-a[1]).slice(0,5);
+  qDiv.innerHTML = '';
+  sortedQ.forEach(([q, n]) => {
+    const pct = total > 0 ? Math.round(n / total * 100) : 0;
+    qDiv.innerHTML += `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:13px;font-weight:600;color:#1A1F36;width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${q}</span>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${pct}%;background:#183ce6;"></div>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:#6B7280;width:36px;text-align:right;">${n}</span>
+      </div>`;
+  });
+  if (sortedQ.length === 0) {
+    qDiv.innerHTML = '<p style="color:#9CA3AF;font-size:13px;text-align:center;">Aucune donnée</p>';
+  }
+}
+</script>
+</body>
+</html>
