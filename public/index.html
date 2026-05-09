@@ -4,136 +4,98 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AlertBukavu — Alertes en cours</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<link rel="stylesheet" href="style.css"/>
 <style>
-  body { font-family:'Inter',sans-serif; background:#F7F8FF; padding-bottom:80px; }
-  .ms { font-family:'Material Symbols Outlined'; }
-  .live-pulse { animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.2)} }
-  .card { background:white; border-radius:16px; border:1px solid #E5E7EB;
-    box-shadow:0 2px 12px rgba(61,90,254,.06); overflow:hidden;
-    transition:box-shadow .2s, transform .2s; }
-  .card:hover { box-shadow:0 6px 24px rgba(61,90,254,.12); transform:translateY(-2px); }
-  .filter-btn { padding:8px 18px; border-radius:100px; font-size:13px; font-weight:600;
-    cursor:pointer; border:1.5px solid #E5E7EB; background:white; color:#6B7280;
-    white-space:nowrap; transition:all .2s; }
-  .filter-btn.active { background:#183ce6; color:white; border-color:#183ce6; }
-  .filter-btn:hover:not(.active) { background:#EEF0FF; border-color:#183ce6; color:#183ce6; }
-  .badge { padding:3px 10px; border-radius:6px; font-size:10px; font-weight:700;
-    text-transform:uppercase; letter-spacing:.05em; }
-  .btn-confirm { flex:1; padding:10px; border-radius:10px; font-size:13px; font-weight:600;
-    cursor:pointer; border:none; background:#E6FAF5; color:#00C48C; transition:all .2s;
-    display:flex; align-items:center; justify-content:center; gap:6px; }
-  .btn-confirm:hover { background:#c8f5e9; }
-  .btn-signal { padding:10px 16px; border-radius:10px; font-size:13px; font-weight:600;
-    cursor:pointer; border:none; background:#FFF0F5; color:#FF3D71; transition:all .2s;
-    display:flex; align-items:center; justify-content:center; gap:6px; }
-  .btn-signal:hover { background:#ffd6e4; }
-  .fab { position:fixed; bottom:90px; right:20px; width:56px; height:56px;
-    background:#183ce6; color:white; border-radius:50%; border:none; cursor:pointer;
-    box-shadow:0 4px 20px rgba(24,60,230,.4); display:flex; align-items:center;
-    justify-content:center; font-size:28px; transition:transform .2s; z-index:50; }
-  .fab:hover { transform:scale(1.1); }
-  .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:white;
-    border-top:1px solid #E5E7EB; display:flex; z-index:40;
-    box-shadow:0 -2px 12px rgba(61,90,254,.06); }
-  .nav-item { flex:1; display:flex; flex-direction:column; align-items:center;
-    justify-content:center; padding:10px 0; text-decoration:none; color:#9CA3AF;
-    font-size:11px; font-weight:600; gap:3px; transition:color .2s; }
-  .nav-item.active { color:#183ce6; }
-  .nav-item .ms { font-size:22px; }
-  .empty-state { text-align:center; padding:60px 20px; }
-  .skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
-    background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:8px; }
-  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-  .card-anim { animation:slideUp .35s ease both; }
-  @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-  .no-scrollbar::-webkit-scrollbar { display:none; }
+  .material-symbols-outlined { font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48; }
+  body { padding-bottom: 80px; }
+  .fab {
+    position:fixed;bottom:88px;right:20px;
+    width:56px;height:56px;background:#840015;color:white;
+    border-radius:50%;border:none;cursor:pointer;
+    box-shadow:0 4px 20px rgba(132,0,21,.4);
+    display:flex;align-items:center;justify-content:center;
+    font-size:28px;transition:transform .2s,box-shadow .2s;z-index:50;
+  }
+  .fab:hover { transform:scale(1.08);box-shadow:0 6px 24px rgba(132,0,21,.5); }
+  .fab:active { transform:scale(.96); }
 </style>
 </head>
-<body>
+<body style="background:#fcf9f8;">
 
-<!-- Header -->
-<header style="background:white;border-bottom:1px solid #E5E7EB;position:sticky;top:0;z-index:40;box-shadow:0 2px 8px rgba(61,90,254,.05);">
-  <div style="max-width:900px;margin:0 auto;padding:0 16px;height:64px;display:flex;align-items:center;justify-content:space-between;">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div style="width:36px;height:36px;background:linear-gradient(135deg,#3D5AFE,#2739C7);border-radius:10px;display:flex;align-items:center;justify-content:center;">
-        <span class="ms text-white" style="font-size:18px;color:white;">shield</span>
-      </div>
-      <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:#1A1F36;">AlertBukavu</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div style="display:flex;align-items:center;gap:6px;background:#E6FAF5;padding:6px 12px;border-radius:100px;">
-        <span style="width:8px;height:8px;border-radius:50%;background:#00C48C;" class="live-pulse"></span>
-        <span style="color:#00C48C;font-size:12px;font-weight:700;">EN DIRECT</span>
-      </div>
-    </div>
+<!-- Top Bar -->
+<header class="top-bar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="material-symbols-outlined" style="color:white;font-size:22px;">emergency</span>
+    <h1 style="font-size:18px;font-weight:800;color:white;letter-spacing:.01em;">AlertBukavu</h1>
   </div>
+  <div id="userAvatar" style="cursor:pointer;" onclick="window.location.href='profil.html'"></div>
 </header>
 
-<!-- Contenu principal -->
+<!-- Hero section -->
+<section style="background:#840015;padding:24px 20px 48px;">
+  <h2 style="font-size:28px;font-weight:800;color:white;letter-spacing:-.02em;margin-bottom:6px;">Alertes en cours</h2>
+  <p style="font-size:14px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:8px;">
+    <span class="live-dot"></span>
+    <span id="compteurLabel">Chargement...</span>
+  </p>
+</section>
+
+<!-- Filtres -->
+<div style="position:sticky;top:56px;z-index:30;background:white;border-bottom:1px solid #e4bdbb;box-shadow:0 2px 8px rgba(132,0,21,.05);">
+  <div style="display:flex;gap:8px;overflow-x:auto;padding:12px 16px;" class="no-scrollbar">
+    <button class="pill active" onclick="filtrer(this,'tous')">Toutes</button>
+    <button class="pill" onclick="filtrer(this,'securite')">Sécurité</button>
+    <button class="pill" onclick="filtrer(this,'eau')">Eau</button>
+    <button class="pill" onclick="filtrer(this,'routes')">Routes</button>
+    <button class="pill" onclick="filtrer(this,'sante')">Santé</button>
+    <button class="pill" onclick="filtrer(this,'meteo')">Météo</button>
+  </div>
+</div>
+
+<!-- Grille alertes -->
 <main style="max-width:900px;margin:0 auto;padding:20px 16px;">
-
-  <!-- Titre + compteur -->
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-    <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:#1A1F36;">Alertes en cours</h1>
-    <span id="compteur" style="background:#EEF0FF;color:#183ce6;padding:3px 12px;border-radius:100px;font-size:13px;font-weight:700;">0</span>
-  </div>
-
-  <!-- Filtres -->
-  <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:16px;margin-bottom:20px;" class="no-scrollbar">
-    <button class="filter-btn active" data-cat="tous" onclick="filtrer(this,'tous')">Toutes</button>
-    <button class="filter-btn" data-cat="securite" onclick="filtrer(this,'securite')">Sécurité</button>
-    <button class="filter-btn" data-cat="eau" onclick="filtrer(this,'eau')">Eau</button>
-    <button class="filter-btn" data-cat="routes" onclick="filtrer(this,'routes')">Routes</button>
-    <button class="filter-btn" data-cat="sante" onclick="filtrer(this,'sante')">Santé</button>
-    <button class="filter-btn" data-cat="meteo" onclick="filtrer(this,'meteo')">Météo</button>
-  </div>
-
-  <!-- Grille alertes -->
   <div id="alertesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
-    <!-- Skeleton loaders -->
-    <div class="card" style="height:200px;"><div class="skeleton" style="height:100%;"></div></div>
-    <div class="card" style="height:200px;"><div class="skeleton" style="height:100%;"></div></div>
-    <div class="card" style="height:200px;"><div class="skeleton" style="height:100%;"></div></div>
+    <div class="card" style="height:180px;"><div class="skeleton" style="height:100%;border-radius:12px;"></div></div>
+    <div class="card" style="height:180px;"><div class="skeleton" style="height:100%;border-radius:12px;"></div></div>
+    <div class="card" style="height:180px;"><div class="skeleton" style="height:100%;border-radius:12px;"></div></div>
   </div>
 
   <!-- État vide -->
-  <div id="emptyState" class="empty-state" style="display:none;">
-    <div style="width:64px;height:64px;background:#EEF0FF;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-      <span class="ms" style="font-size:28px;color:#183ce6;">notifications_none</span>
+  <div id="emptyState" style="display:none;text-align:center;padding:64px 20px;">
+    <div style="width:72px;height:72px;background:#ffdad8;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+      <span class="material-symbols-outlined" style="font-size:32px;color:#840015;">notifications_none</span>
     </div>
-    <p style="color:#1A1F36;font-weight:700;font-size:16px;margin-bottom:6px;">Aucune alerte</p>
-    <p style="color:#6B7280;font-size:14px;">Soyez le premier à signaler un problème</p>
+    <p style="font-weight:700;font-size:16px;color:#1c1b1b;margin-bottom:6px;">Aucune alerte</p>
+    <p style="color:#5b403e;font-size:14px;">Soyez le premier à signaler un incident</p>
   </div>
-
 </main>
 
 <!-- FAB -->
 <button class="fab" onclick="window.location.href='publier.html'" title="Publier une alerte">
-  <span class="ms" style="color:white;font-size:26px;">add_alert</span>
+  <span class="material-symbols-outlined" style="font-size:26px;color:white;">add_alert</span>
 </button>
 
 <!-- Bottom Nav -->
 <nav class="bottom-nav">
   <a href="index.html" class="nav-item active">
-    <span class="ms" style="font-variation-settings:'FILL' 1;">rss_feed</span>
+    <span class="material-symbols-outlined" style="font-size:22px;">rss_feed</span>
     <span>Alertes</span>
   </a>
   <a href="publier.html" class="nav-item">
-    <span class="ms">add_alert</span>
+    <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">add_alert</span>
     <span>Publier</span>
   </a>
   <a href="stats.html" class="nav-item">
-    <span class="ms">analytics</span>
+    <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">analytics</span>
     <span>Stats</span>
   </a>
   <a href="profil.html" class="nav-item">
-    <span class="ms">person</span>
+    <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">person</span>
     <span>Profil</span>
   </a>
 </nav>
@@ -144,54 +106,55 @@ let toutesLesAlertes = [];
 let filtreActuel = 'tous';
 let currentUser = null;
 
-// Auth + chargement
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(async user => {
   if (!user) { window.location.href = 'login.html'; return; }
   currentUser = user;
+
+  // Avatar dans le header
+  try {
+    const doc = await db.collection('users').doc(user.uid).get();
+    const nom = doc.exists ? (doc.data().nom || user.email) : user.email;
+    const avatarEl = document.getElementById('userAvatar');
+    const img = document.createElement('img');
+    img.src = genererAvatar(nom, 36);
+    img.style.cssText = 'width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,255,255,.4);';
+    avatarEl.appendChild(img);
+  } catch(e) {}
+
   chargerAlertes();
 });
 
-// Chargement temps réel Firestore
 function chargerAlertes() {
   db.collection('alertes')
-    .where('statut', '!=', 'suspendue')
-    .orderBy('statut')
     .orderBy('createdAt', 'desc')
-    .limit(50)
+    .limit(60)
     .onSnapshot(snapshot => {
-      toutesLesAlertes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      toutesLesAlertes = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(a => a.statut !== 'suspendue');
       afficherAlertes();
-    }, err => {
-      // Fallback sans filtre statut si l'index n'existe pas encore
-      db.collection('alertes')
-        .orderBy('createdAt', 'desc')
-        .limit(50)
-        .onSnapshot(snapshot => {
-          toutesLesAlertes = snapshot.docs
-            .map(doc => ({ id: doc.id, ...doc.data() }))
-            .filter(a => a.statut !== 'suspendue');
+    }, () => {
+      db.collection('alertes').orderBy('createdAt','desc').limit(60)
+        .onSnapshot(snap => {
+          toutesLesAlertes = snap.docs.map(d=>({id:d.id,...d.data()})).filter(a=>a.statut!=='suspendue');
           afficherAlertes();
         });
     });
 }
 
 function filtrer(btn, cat) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   filtreActuel = cat;
   afficherAlertes();
 }
 
 function afficherAlertes() {
+  let liste = filtreActuel === 'tous' ? toutesLesAlertes : toutesLesAlertes.filter(a => a.categorie === filtreActuel);
   const grid = document.getElementById('alertesGrid');
   const empty = document.getElementById('emptyState');
 
-  let liste = toutesLesAlertes;
-  if (filtreActuel !== 'tous') {
-    liste = liste.filter(a => a.categorie === filtreActuel);
-  }
-
-  document.getElementById('compteur').textContent = liste.length;
+  document.getElementById('compteurLabel').textContent = liste.length + ' alerte' + (liste.length > 1 ? 's' : '') + ' actives';
 
   if (liste.length === 0) {
     grid.innerHTML = '';
@@ -199,7 +162,6 @@ function afficherAlertes() {
     return;
   }
   empty.style.display = 'none';
-
   grid.innerHTML = liste.map((a, i) => cardHTML(a, i)).join('');
 }
 
@@ -207,92 +169,62 @@ function cardHTML(a, index) {
   const cat = CATEGORIES[a.categorie] || CATEGORIES.autre;
   const urg = URGENCES[a.niveauUrgence] || URGENCES.faible;
   const temps = a.createdAt ? tempsRelatif(a.createdAt.toMillis()) : 'récent';
-  const borderColor = urg.border;
-  const delay = Math.min(index * 60, 300);
+  const delay = Math.min(index * 50, 300);
+  const urgClass = `urgence-${a.niveauUrgence || 'faible'}`;
 
   return `
-  <div class="card card-anim" style="border-left:4px solid ${borderColor};animation-delay:${delay}ms;">
-    <div style="padding:18px 18px 14px;">
-
-      <!-- Badges + temps -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-        <span class="badge" style="background:${urg.badgeBg};color:${urg.border};">${urg.label}</span>
-        <span class="badge" style="background:${cat.bg};color:${cat.color};">${cat.label}</span>
-        <span style="margin-left:auto;color:#9CA3AF;font-size:11px;display:flex;align-items:center;gap:3px;">
-          <span class="ms" style="font-size:13px;">schedule</span>${temps}
+  <div class="card card-anim ${urgClass}" style="animation-delay:${delay}ms;">
+    <div style="padding:16px 18px 12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:${urg.bg};color:${urg.color};">${urg.label}</span>
+        <span style="padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:${cat.bg};color:${cat.color};">${cat.label}</span>
+        <span style="margin-left:auto;font-size:11px;color:#906f6d;display:flex;align-items:center;gap:3px;">
+          <span class="material-symbols-outlined" style="font-size:13px;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20;">schedule</span>${temps}
         </span>
       </div>
-
-      <!-- Titre -->
-      <h3 style="font-size:15px;font-weight:700;color:#1A1F36;margin-bottom:6px;line-height:1.4;">${escHtml(a.titre)}</h3>
-
-      <!-- Description -->
-      <p style="font-size:13px;color:#6B7280;margin-bottom:12px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escHtml(a.description)}</p>
-
-      <!-- Quartier + confirmations -->
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:12px;color:#6B7280;display:flex;align-items:center;gap:4px;">
-          <span class="ms" style="font-size:14px;color:#183ce6;">location_on</span>${escHtml(a.quartier)}
+      <h3 style="font-size:15px;font-weight:700;color:#1c1b1b;margin-bottom:6px;line-height:1.4;">${escHtml(a.titre)}</h3>
+      <p style="font-size:13px;color:#5b403e;line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escHtml(a.description)}</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#906f6d;">
+        <span style="display:flex;align-items:center;gap:4px;">
+          <span class="material-symbols-outlined" style="font-size:14px;color:#840015;">location_on</span>${escHtml(a.quartier)}
         </span>
-        <span style="font-size:12px;color:#6B7280;">${a.nbConfirmations || 0} confirmation${(a.nbConfirmations||0)>1?'s':''}</span>
+        <span>${a.nbConfirmations||0} confirmation${(a.nbConfirmations||0)>1?'s':''}</span>
       </div>
     </div>
-
-    <!-- Actions -->
-    <div style="border-top:1px solid #F3F4F6;padding:12px 18px;display:flex;gap:10px;">
-      <button class="btn-confirm" onclick="confirmer('${a.id}')">
-        <span class="ms" style="font-size:16px;">check_circle</span>Confirmer
+    <div style="border-top:1px solid #f0eded;padding:10px 18px;display:flex;gap:10px;">
+      <button onclick="confirmer('${a.id}')" style="flex:1;padding:9px;border-radius:8px;border:none;background:#E6FAF5;color:#00C48C;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .2s;" onmouseover="this.style.background='#c8f5e9'" onmouseout="this.style.background='#E6FAF5'">
+        <span class="material-symbols-outlined" style="font-size:15px;">check_circle</span>Confirmer
       </button>
-      <button class="btn-signal" onclick="signaler('${a.id}')">
-        <span class="ms" style="font-size:16px;">flag</span>Signaler
+      <button onclick="signaler('${a.id}')" style="padding:9px 14px;border-radius:8px;border:none;background:#ffdad8;color:#840015;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .2s;" onmouseover="this.style.background='#ffb3af'" onmouseout="this.style.background='#ffdad8'">
+        <span class="material-symbols-outlined" style="font-size:15px;">flag</span>Signaler
       </button>
     </div>
   </div>`;
 }
 
-function escHtml(str) {
-  if (!str) return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
 async function confirmer(alerteId) {
   if (!currentUser) { showToast('Connectez-vous pour confirmer','error'); return; }
-
   const confirmRef = db.collection('confirmations').doc(`${alerteId}_${currentUser.uid}`);
   const exists = await confirmRef.get();
-
-  if (exists.exists) {
-    showToast('Vous avez déjà confirmé cette alerte','info');
-    return;
-  }
-
+  if (exists.exists) { showToast('Vous avez déjà confirmé cette alerte','info'); return; }
   const batch = db.batch();
-  const alerteRef = db.collection('alertes').doc(alerteId);
-
   batch.set(confirmRef, { alerteId, userId: currentUser.uid, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-  batch.update(alerteRef, { nbConfirmations: firebase.firestore.FieldValue.increment(1) });
-
+  batch.update(db.collection('alertes').doc(alerteId), { nbConfirmations: firebase.firestore.FieldValue.increment(1) });
   await batch.commit();
-
-  // Auto-confirmer si >= 3
-  const alerteDoc = await alerteRef.get();
-  if (alerteDoc.data().nbConfirmations >= 3 && alerteDoc.data().statut === 'en_attente') {
-    await alerteRef.update({ statut: 'confirmee' });
+  const doc = await db.collection('alertes').doc(alerteId).get();
+  if (doc.data().nbConfirmations >= 3 && doc.data().statut === 'en_attente') {
+    await db.collection('alertes').doc(alerteId).update({ statut: 'confirmee' });
   }
-
   showToast('Confirmation enregistrée');
 }
 
 async function signaler(alerteId) {
   if (!currentUser) { showToast('Connectez-vous pour signaler','error'); return; }
-
-  const alerteRef = db.collection('alertes').doc(alerteId);
-  await alerteRef.update({ nbSignalements: firebase.firestore.FieldValue.increment(1) });
-
-  const doc = await alerteRef.get();
-  if (doc.data().nbSignalements >= 5) {
-    await alerteRef.update({ statut: 'suspendue' });
-    showToast('Alerte suspendue après signalements', 'info');
+  await db.collection('alertes').doc(alerteId).update({ nbSignalements: firebase.firestore.FieldValue.increment(1) });
+  const doc = await db.collection('alertes').doc(alerteId).get();
+  if ((doc.data().nbSignalements||0) >= 5) {
+    await db.collection('alertes').doc(alerteId).update({ statut: 'suspendue' });
+    showToast('Alerte signalée et suspendue','info');
   } else {
     showToast('Alerte signalée, merci');
   }
