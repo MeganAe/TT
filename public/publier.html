@@ -224,7 +224,7 @@ async function publier() {
       try { imageUrl = await uploadImage(imageFile, 'alertes'); } catch(e) { console.warn('Upload image échoué'); }
     }
 
-    await db.collection('alertes').add({
+    const alerteData = {
       titre, description,
       categorie: categorieChoisie,
       quartier,
@@ -238,6 +238,22 @@ async function publier() {
       nbConfirmations: 0,
       nbSignalements: 0,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    await db.collection('alertes').add(alerteData);
+
+    currentUser.getIdToken().then(token => fetch('/api/notify-alert', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        ...alerteData,
+        createdAt: new Date().toISOString()
+      })
+    })).catch(error => {
+      console.warn('Notification email non envoyee:', error);
     });
 
     db.collection('users').doc(currentUser.uid).update({
