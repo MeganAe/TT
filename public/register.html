@@ -142,7 +142,7 @@
         <div class="tel-wrap">
           <div class="tel-prefix">+243</div>
           <input id="telephone" type="tel" class="tel-input"
-            placeholder="8X XXX XXXX" maxlength="9"
+            placeholder="812 345 678" 
             oninput="formatTelephone(this)" inputmode="numeric"/>
         </div>
         <p id="telStatus" style="font-size:11px;margin-bottom:12px;padding-left:4px;min-height:16px;"></p>
@@ -222,32 +222,17 @@
     f.style.background=s>0?cols[s-1]:'';
   }
 
-  // Formatage téléphone — chiffres seulement, max 9
+  // Formatage téléphone — accepte le format avec ou sans +243
   function formatTelephone(input) {
-    // Garder seulement les 9 chiffres après +243
-    let digits = input.value.replace(/\D/g,'').slice(0, 9);
-    // Format: XX XXX XXXX
-    let formatted = digits;
-    if (digits.length > 2 && digits.length <= 5) formatted = digits.slice(0,2)+' '+digits.slice(2);
-    else if (digits.length > 5) formatted = digits.slice(0,2)+' '+digits.slice(2,5)+' '+digits.slice(5);
-    input.value = formatted;
-
+    let val = input.value.trim();
+    // Accepter n'importe quel format
     const status = document.getElementById('telStatus');
-    if (digits.length === 0) { status.textContent=''; return; }
-    if (digits.length < 9) {
-      status.textContent = digits.length + '/9 chiffres';
-      status.style.color = '#FF9F43';
-    } else {
-      // Valider le numéro complet
-      const full = '+243' + digits;
-      if (validerTelephoneRDC(full)) {
-        status.textContent = 'Numéro RDC valide';
-        status.style.color = '#00C48C';
-      } else {
-        status.textContent = 'Numéro invalide';
-        status.style.color = '#FF3D71';
-      }
+    if (val.length === 0) { 
+      status.textContent=''; 
+      return; 
     }
+    status.textContent = 'Numéro accepté';
+    status.style.color = '#00C48C';
   }
 
   // Vérification username
@@ -272,8 +257,8 @@
     const nom       = document.getElementById('nom').value.trim();
     const username  = document.getElementById('username').value.trim().toLowerCase();
     const email     = document.getElementById('email').value.trim();
-    const telRaw    = document.getElementById('telephone').value.replace(/\D/g,'');
-    const telephone = '+243' + telRaw;
+    const telRaw    = document.getElementById('telephone').value.trim();
+    const telephone = telRaw.startsWith('+243') ? telRaw : '+243' + telRaw.replace(/\D/g,'');
     const quartier  = document.getElementById('quartier').value;
     const password  = document.getElementById('password').value;
     const btn       = document.getElementById('btnReg');
@@ -282,8 +267,7 @@
     if (!nom)                              { showToast('Le nom est requis','error'); return; }
     if (!validerUsername(username))        { showToast('Nom d\'utilisateur invalide (3-20 car., lettres/chiffres/_)','error'); return; }
     if (!email)                            { showToast('L\'email est requis','error'); return; }
-    if (telRaw.length !== 9)               { showToast('Le numéro doit contenir 9 chiffres après +243','error'); return; }
-    if (!validerTelephoneRDC(telephone))   { showToast('Numéro de téléphone RDC invalide','error'); return; }
+    if (!telRaw)                           { showToast('Le numéro de téléphone est requis','error'); return; }
     if (!quartier)                         { showToast('Choisissez votre quartier','error'); return; }
     if (password.length < 8)              { showToast('Mot de passe trop court (min. 8 car.)','error'); return; }
 
