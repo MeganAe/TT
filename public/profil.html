@@ -4,26 +4,24 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AlertBukavu — Mon Profil</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="style.css"/>
 <style>
   .material-symbols-outlined { font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48; }
-  body { padding-bottom:80px; background:#fcf9f8; }
-  .section-card { background:white;border-radius:12px;border:1px solid #e4bdbb;padding:20px;margin-bottom:14px;box-shadow:0 1px 4px rgba(132,0,21,.05); }
+  body { padding-bottom:80px;background:#fcf9f8; }
+  .stat-mini { flex:1;background:white;border-radius:12px;border:1px solid #e4bdbb;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(132,0,21,.05); }
   .alerte-row { display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid #f0eded; }
   .alerte-row:last-child { border-bottom:none;padding-bottom:0; }
-  .stat-mini { flex:1;background:white;border-radius:12px;border:1px solid #e4bdbb;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(132,0,21,.05); }
-  .stat-mini-val { font-size:28px;font-weight:800;line-height:1;margin-bottom:4px; }
-  .stat-mini-lbl { font-size:11px;font-weight:700;color:#906f6d;text-transform:uppercase;letter-spacing:.05em; }
 </style>
 </head>
 <body>
 
-<!-- Top Bar -->
 <header class="top-bar">
   <div style="display:flex;align-items:center;gap:10px;">
     <span class="material-symbols-outlined" style="font-size:20px;color:white;">emergency</span>
@@ -31,25 +29,36 @@
   </div>
 </header>
 
-<!-- Hero avec avatar -->
-<section style="background:#840015;padding:24px 20px 56px;text-align:center;">
-  <div id="avatarContainer" style="display:inline-block;margin-bottom:14px;"></div>
-  <h2 id="nomUser" style="font-size:22px;font-weight:800;color:white;margin-bottom:4px;">Chargement...</h2>
-  <p id="emailUser" style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:10px;"></p>
+<!-- Hero avec photo -->
+<section style="background:#840015;padding:24px 20px 56px;text-align:center;position:relative;">
+  <div style="position:relative;display:inline-block;margin-bottom:14px;">
+    <img id="profilePhoto" src="" alt="Photo de profil" style="width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.4);box-shadow:0 4px 20px rgba(0,0,0,.2);"/>
+    <label for="photoChangeInput" style="position:absolute;bottom:0;right:0;width:28px;height:28px;background:#840015;border:2px solid white;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+      <span class="material-symbols-outlined" style="font-size:14px;color:white;">edit</span>
+    </label>
+    <input type="file" id="photoChangeInput" accept="image/*" style="display:none;" onchange="changerPhoto(event)"/>
+  </div>
+  <h2 id="nomUser" style="font-size:20px;font-weight:800;color:white;margin-bottom:2px;">Chargement...</h2>
+  <p id="usernameUser" style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:8px;"></p>
+  <p id="emailUser" style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:10px;"></p>
   <span id="quartierBadge" style="background:rgba(255,255,255,.15);color:white;padding:4px 16px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.3);"></span>
 </section>
 
 <main style="max-width:640px;margin:-32px auto 0;padding:0 16px;position:relative;z-index:1;">
 
-  <!-- Stats perso -->
+  <!-- Stats -->
   <div style="display:flex;gap:12px;margin-bottom:14px;">
     <div class="stat-mini">
-      <p class="stat-mini-val" id="nbAlertes" style="color:#840015;">0</p>
-      <p class="stat-mini-lbl">Alertes</p>
+      <p id="nbAlertes" style="font-size:28px;font-weight:800;color:#840015;line-height:1;margin-bottom:4px;">0</p>
+      <p style="font-size:11px;font-weight:700;color:#906f6d;text-transform:uppercase;letter-spacing:.05em;">Alertes</p>
     </div>
     <div class="stat-mini">
-      <p class="stat-mini-val" id="nbConfirmations" style="color:#00C48C;">0</p>
-      <p class="stat-mini-lbl">Confirmations</p>
+      <p id="nbConfirmations" style="font-size:28px;font-weight:800;color:#00C48C;line-height:1;margin-bottom:4px;">0</p>
+      <p style="font-size:11px;font-weight:700;color:#906f6d;text-transform:uppercase;letter-spacing:.05em;">Confirmations</p>
+    </div>
+    <div class="stat-mini">
+      <p id="nbFausses" style="font-size:28px;font-weight:800;color:#FF3D71;line-height:1;margin-bottom:4px;">0</p>
+      <p style="font-size:11px;font-weight:700;color:#906f6d;text-transform:uppercase;letter-spacing:.05em;">Fausses alertes</p>
     </div>
   </div>
 
@@ -61,9 +70,9 @@
     </h2>
     <p style="font-size:12px;color:#906f6d;margin-bottom:14px;">Vos 10 dernières publications</p>
     <div id="mesAlertesList">
-      <div class="skeleton" style="height:60px;margin-bottom:10px;"></div>
-      <div class="skeleton" style="height:60px;margin-bottom:10px;"></div>
-      <div class="skeleton" style="height:60px;"></div>
+      <div class="skeleton" style="height:56px;margin-bottom:10px;border-radius:8px;"></div>
+      <div class="skeleton" style="height:56px;margin-bottom:10px;border-radius:8px;"></div>
+      <div class="skeleton" style="height:56px;border-radius:8px;"></div>
     </div>
   </div>
 
@@ -77,62 +86,75 @@
 
 </main>
 
-<!-- Bottom Nav -->
 <nav class="bottom-nav">
-  <a href="index.html" class="nav-item">
-    <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">rss_feed</span>
-    <span>Alertes</span>
-  </a>
-  <a href="publier.html" class="nav-item">
-    <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">add_alert</span>
-    <span>Publier</span>
-  </a>
-  <a href="stats.html" class="nav-item">
-    <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">analytics</span>
-    <span>Stats</span>
-  </a>
-  <a href="profil.html" class="nav-item active">
-    <span class="material-symbols-outlined" style="font-size:22px;">person</span>
-    <span>Profil</span>
-  </a>
+  <a href="index.html" class="nav-item"><span class="material-symbols-outlined ms-o" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">rss_feed</span><span>Alertes</span></a>
+  <a href="publier.html" class="nav-item"><span class="material-symbols-outlined ms-o" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">add_alert</span><span>Publier</span></a>
+  <a href="stats.html" class="nav-item"><span class="material-symbols-outlined ms-o" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">analytics</span><span>Stats</span></a>
+  <a href="profil.html" class="nav-item active"><span class="material-symbols-outlined" style="font-size:22px;">person</span><span>Profil</span></a>
 </nav>
 
 <script src="firebase-config.js"></script>
 <script>
-auth.onAuthStateChanged(async user => {
-  if (!user) { window.location.href = 'login.html'; return; }
+let currentUser = null;
+let currentUserData = null;
 
+requireAuth().then(async user => {
+  currentUser = user;
   document.getElementById('emailUser').textContent = user.email;
-
-  // Charger profil
   try {
     const doc = await db.collection('users').doc(user.uid).get();
-    const data = doc.exists ? doc.data() : {};
-    const nom = data.nom || user.email;
+    if (doc.exists) {
+      currentUserData = doc.data();
+      const d = currentUserData;
+      document.getElementById('nomUser').textContent = d.nom || user.email;
+      document.getElementById('usernameUser').textContent = d.username ? '@' + d.username : '';
+      document.getElementById('quartierBadge').textContent = d.quartier || 'Quartier non défini';
+      document.getElementById('nbAlertes').textContent = d.nbAlertes || 0;
+      document.getElementById('nbConfirmations').textContent = d.nbConfirmations || 0;
+      document.getElementById('nbFausses').textContent = d.nbFaussesAlertes || 0;
 
-    document.getElementById('nomUser').textContent = nom;
-    document.getElementById('quartierBadge').textContent = data.quartier || 'Quartier non défini';
-    document.getElementById('nbAlertes').textContent = data.nbAlertes || 0;
-    document.getElementById('nbConfirmations').textContent = data.nbConfirmations || 0;
-
-    // Avatar SVG dans le hero
-    const container = document.getElementById('avatarContainer');
-    const img = document.createElement('img');
-    img.src = genererAvatar(nom, 80);
-    img.style.cssText = 'width:80px;height:80px;border-radius:50%;border:3px solid rgba(255,255,255,.4);box-shadow:0 4px 20px rgba(0,0,0,.2);';
-    container.appendChild(img);
-
+      // Photo de profil
+      const photo = document.getElementById('profilePhoto');
+      photo.src = getPhotoUrl(d, 88);
+      photo.onerror = () => { photo.src = genererAvatar(d.nom || 'U', 88); };
+    }
   } catch(e) {
     document.getElementById('nomUser').textContent = user.email;
-    const container = document.getElementById('avatarContainer');
-    const img = document.createElement('img');
-    img.src = genererAvatar(user.email, 80);
-    img.style.cssText = 'width:80px;height:80px;border-radius:50%;border:3px solid rgba(255,255,255,.4);';
-    container.appendChild(img);
+    document.getElementById('profilePhoto').src = genererAvatar(user.email, 88);
   }
-
   chargerMesAlertes(user.uid);
 });
+
+async function changerPhoto(event) {
+  const file = event.target.files[0];
+  if (!file || !currentUser) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('Image trop lourde (max 5 Mo)', 'error'); return; }
+
+  const result = await Swal.fire({
+    title: 'Changer la photo ?',
+    text: 'Cette photo sera visible sur toutes vos alertes.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#840015',
+    cancelButtonColor: '#906f6d',
+    confirmButtonText: 'Oui, changer',
+    cancelButtonText: 'Annuler'
+  });
+  if (!result.isConfirmed) return;
+
+  try {
+    showToast('Upload en cours...', 'info');
+    const url = await uploadImage(file, 'profils');
+
+    await db.collection('users').doc(currentUser.uid).update({ photoUrl: url });
+
+    const photo = document.getElementById('profilePhoto');
+    photo.src = url;
+    showToast('Photo de profil mise à jour !');
+  } catch(e) {
+    showToast('Erreur lors de l\'upload', 'error');
+  }
+}
 
 function statutStyle(s) {
   const styles = {
@@ -154,7 +176,7 @@ async function chargerMesAlertes(uid) {
       .get();
 
     if (snap.empty) {
-      list.innerHTML = '<div style="text-align:center;padding:28px 0;"><span class="material-symbols-outlined" style="font-size:32px;color:#e4bdbb;">inbox</span><p style="color:#906f6d;font-size:13px;margin-top:8px;">Aucune alerte publiée</p></div>';
+      list.innerHTML = '<div style="text-align:center;padding:28px 0;"><span class="material-symbols-outlined" style="font-size:36px;color:#e4bdbb;">inbox</span><p style="color:#906f6d;font-size:13px;margin-top:8px;">Aucune alerte publiée</p></div>';
       return;
     }
 
@@ -166,11 +188,11 @@ async function chargerMesAlertes(uid) {
       const temps = a.createdAt ? tempsRelatif(a.createdAt.toMillis()) : '';
       return `
         <div class="alerte-row">
-          <div style="width:10px;height:10px;border-radius:50%;background:${urg.border||urg.color};margin-top:4px;flex-shrink:0;"></div>
+          <div style="width:10px;height:10px;border-radius:50%;background:${urg.color};margin-top:5px;flex-shrink:0;"></div>
           <div style="flex:1;min-width:0;">
-            <p style="font-size:14px;font-weight:700;color:#1c1b1b;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(a.titre||'')}</p>
+            <p style="font-size:14px;font-weight:700;color:#1c1b1b;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(a.titre||'')}</p>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <span style="font-size:10px;font-weight:700;background:${cat.bg};color:${cat.color};padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;">${cat.label}</span>
+              <span style="font-size:10px;font-weight:700;background:${cat.bg};color:${cat.color};padding:2px 8px;border-radius:4px;text-transform:uppercase;">${cat.label}</span>
               <span style="font-size:11px;color:#906f6d;">${temps}</span>
               <span style="font-size:11px;color:#906f6d;">${a.nbConfirmations||0} confirmation${(a.nbConfirmations||0)>1?'s':''}</span>
             </div>
@@ -178,14 +200,23 @@ async function chargerMesAlertes(uid) {
           <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;background:${st.bg};color:${st.color};white-space:nowrap;flex-shrink:0;">${st.label}</span>
         </div>`;
     }).join('');
-
   } catch(e) {
     list.innerHTML = '<p style="color:#906f6d;font-size:13px;text-align:center;padding:20px 0;">Impossible de charger les alertes</p>';
   }
 }
 
 async function deconnecter() {
-  if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
+  const result = await Swal.fire({
+    title: 'Déconnexion',
+    text: 'Voulez-vous vraiment vous déconnecter ?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#840015',
+    cancelButtonColor: '#906f6d',
+    confirmButtonText: 'Oui, déconnecter',
+    cancelButtonText: 'Annuler'
+  });
+  if (result.isConfirmed) {
     await auth.signOut();
     window.location.href = 'login.html';
   }

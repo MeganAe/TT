@@ -4,39 +4,35 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AlertBukavu — Connexion</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="style.css"/>
 <style>
-  .material-symbols-outlined {
-    font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
-  }
-  body {
-    min-height: max(884px, 100dvh);
-    display: flex; align-items: center; justify-content: center;
-    position: relative; overflow: hidden;
-    background: #1c1b1b;
-  }
+  .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  body { min-height:max(884px,100dvh);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#1c1b1b; }
+  .input-wrap { position:relative;margin-bottom:14px; }
+  .input-wrap .ico { position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:18px;color:#906f6d;pointer-events:none; }
 </style>
 </head>
 <body>
 
-<!-- Background image Bukavu -->
+<!-- Background Bukavu -->
 <div style="position:absolute;inset:0;z-index:0;">
   <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMcZwNH9PaJycSQXZPnZC-_HSOTENwx0QNNE7-4uorlL8q6YbeNsaaRuiDlYXrtpzBFiZ5E6J0rXyqZmzmcGw_WsgzFEogYb16b833tuTIMJZ_MnJG-QiQqOj74IXsOK0b5CyshKxyqeTxWCyw9CK07WSrQruhyFVg7g08QNa1_ZkyN8KS3ckEP-UyucX2a8DrVeicBPEpSR8JX3nTnJ1tQCY-VGpaMlLDOZ31Bf2qGV2KZjQZCZt46bDQGhnSQuWP5xd7rlY0SYTz"
     alt="Bukavu" style="width:100%;height:100%;object-fit:cover;filter:brightness(.85) saturate(.6);"/>
   <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.2),transparent,rgba(0,0,0,.5));"></div>
 </div>
 
-<!-- Card connexion -->
 <main style="position:relative;z-index:10;width:100%;max-width:400px;padding:0 20px;">
-  <div style="background:white;border-radius:12px;box-shadow:0 25px 50px rgba(0,0,0,.3);overflow:visible;padding:48px 32px 32px;display:flex;flex-direction:column;align-items:center;position:relative;margin-top:56px;">
+  <div style="background:white;border-radius:16px;box-shadow:0 25px 60px rgba(0,0,0,.35);padding:48px 32px 32px;position:relative;margin-top:56px;">
 
     <!-- Logo flottant -->
-    <div style="position:absolute;top:-48px;left:50%;transform:translateX(-50%);width:96px;height:96px;background:white;border-radius:50%;padding:8px;box-shadow:0 4px 20px rgba(132,0,21,.2);display:flex;align-items:center;justify-content:center;">
+    <div style="position:absolute;top:-48px;left:50%;transform:translateX(-50%);width:96px;height:96px;background:white;border-radius:50%;padding:8px;box-shadow:0 4px 20px rgba(132,0,21,.25);display:flex;align-items:center;justify-content:center;">
       <div class="logo-pulse" style="width:100%;height:100%;border:3px solid #840015;border-radius:50%;display:flex;align-items:center;justify-content:center;">
         <span class="material-symbols-outlined" style="color:#840015;font-size:42px;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 48;">emergency</span>
       </div>
@@ -45,66 +41,65 @@
     <!-- Titre -->
     <div style="text-align:center;margin-bottom:28px;">
       <h1 style="font-size:28px;font-weight:800;color:#840015;letter-spacing:-.01em;margin-bottom:4px;">ALERT BUKAVU</h1>
-      <p style="font-size:14px;color:#5b403e;font-weight:500;">Informer. Protéger. Agir.</p>
+      <p style="font-size:13px;color:#5b403e;font-weight:500;">Informer. Protéger. Agir.</p>
     </div>
 
-    <!-- Formulaire -->
-    <form style="width:100%;" onsubmit="return false;">
+    <!-- Message compte bloqué -->
+    <div id="bloqueMsg" style="display:none;background:#ffdad8;border:1px solid #840015;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#410006;font-size:13px;font-weight:500;text-align:center;">
+      Votre compte a été suspendu pour fausse alerte.
+    </div>
 
-      <!-- Email -->
-      <div style="position:relative;margin-bottom:14px;">
-        <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;">
-          <span class="material-symbols-outlined" style="color:#906f6d;font-size:20px;transition:color .2s;" id="iconEmail">mail</span>
-        </div>
-        <input id="email" type="email" class="input-field" placeholder="Votre adresse email"
-          onfocus="document.getElementById('iconEmail').style.color='#840015'"
-          onblur="document.getElementById('iconEmail').style.color='#906f6d'"/>
+    <form onsubmit="return false;">
+
+      <!-- Username -->
+      <div class="input-wrap">
+        <span class="material-symbols-outlined ico">alternate_email</span>
+        <input id="username" type="text" class="field-input" placeholder="Nom d'utilisateur" style="height:52px;font-size:15px;" autocomplete="username"/>
       </div>
 
       <!-- Mot de passe -->
-      <div style="position:relative;margin-bottom:8px;">
-        <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;">
-          <span class="material-symbols-outlined" style="color:#906f6d;font-size:20px;transition:color .2s;" id="iconPwd">vpn_key</span>
-        </div>
-        <input id="password" type="password" class="input-field" placeholder="Mot de passe"
-          style="padding-right:48px;"
-          onfocus="document.getElementById('iconPwd').style.color='#840015'"
-          onblur="document.getElementById('iconPwd').style.color='#906f6d'"
-          onkeydown="if(event.key==='Enter')login()"/>
-        <button type="button" onclick="togglePwd()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#906f6d;display:flex;align-items:center;">
-          <span class="material-symbols-outlined" id="eyeIcon" style="font-size:20px;">visibility</span>
+      <div class="input-wrap" style="margin-bottom:8px;">
+        <span class="material-symbols-outlined ico">vpn_key</span>
+        <input id="password" type="password" class="field-input" placeholder="Mot de passe" style="height:52px;font-size:15px;padding-right:48px;" onkeydown="if(event.key==='Enter')login()" autocomplete="current-password"/>
+        <button type="button" onclick="togglePwd()" style="position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#906f6d;">
+          <span class="material-symbols-outlined" id="eyeIcon" style="font-size:18px;">visibility</span>
         </button>
       </div>
 
-      <!-- Erreur -->
-      <div id="errorMsg" style="display:none;background:#ffdad6;border:1px solid #ba1a1a;border-radius:8px;padding:10px 14px;margin-bottom:14px;color:#93000a;font-size:13px;font-weight:500;"></div>
-
-      <!-- Bouton connexion -->
-      <button type="button" id="btnLogin" class="btn-primary" onclick="login()" style="margin-top:8px;">
+      <button type="button" id="btnLogin" class="btn-primary" onclick="login()" style="margin-top:20px;height:52px;font-size:16px;">
         SE CONNECTER
-        <span class="material-symbols-outlined" style="font-size:20px;">arrow_forward</span>
+        <span class="material-symbols-outlined" style="font-size:18px;color:white;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">arrow_forward</span>
       </button>
-
     </form>
 
-    <!-- Lien inscription -->
-    <div style="margin-top:24px;text-align:center;">
-      <a href="register.html" style="font-size:14px;font-weight:600;color:#840015;text-decoration:underline;text-underline-offset:3px;">
-        Pas encore de compte ? S'inscrire
-      </a>
+    <div style="margin:20px 0;display:flex;align-items:center;gap:12px;">
+      <div style="flex:1;height:1px;background:#e4bdbb;"></div>
+      <span style="color:#906f6d;font-size:12px;">ou</span>
+      <div style="flex:1;height:1px;background:#e4bdbb;"></div>
     </div>
 
+    <a href="register.html" style="display:flex;align-items:center;justify-content:center;height:48px;background:#ffdad8;border-radius:8px;color:#840015;font-weight:700;font-size:14px;text-decoration:none;gap:6px;transition:background .2s;" onmouseover="this.style.background='#ffb3af'" onmouseout="this.style.background='#ffdad8'">
+      <span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">person_add</span>
+      Créer un compte
+    </a>
   </div>
 
-  <!-- Footer -->
-  <div style="margin-top:20px;text-align:center;color:rgba(255,255,255,.75);font-size:12px;font-weight:500;text-shadow:0 1px 3px rgba(0,0,0,.5);">
+  <div style="margin-top:20px;text-align:center;color:rgba(255,255,255,.7);font-size:11px;text-shadow:0 1px 3px rgba(0,0,0,.5);">
     AlertBukavu • Réseau communautaire • Bukavu, RDC
   </div>
 </main>
 
 <script src="firebase-config.js"></script>
 <script>
-  redirectIfAuth();
+  // Afficher message si bloqué
+  if (new URLSearchParams(window.location.search).get('bloque')) {
+    document.getElementById('bloqueMsg').style.display = 'block';
+    showBloqueAlert();
+  }
+
+  auth.onAuthStateChanged(user => {
+    if (user) window.location.href = 'index.html';
+  });
 
   function togglePwd() {
     const input = document.getElementById('password');
@@ -114,36 +109,49 @@
   }
 
   async function login() {
-    const email = document.getElementById('email').value.trim();
+    const username = document.getElementById('username').value.trim().toLowerCase();
     const password = document.getElementById('password').value;
     const btn = document.getElementById('btnLogin');
-    const err = document.getElementById('errorMsg');
 
-    err.style.display = 'none';
-
-    if (!email || !password) {
-      err.textContent = 'Veuillez remplir tous les champs.';
-      err.style.display = 'block';
-      return;
-    }
+    if (!username) { showToast('Entrez votre nom d\'utilisateur', 'error'); return; }
+    if (!password) { showToast('Entrez votre mot de passe', 'error'); return; }
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>&nbsp;Connexion...';
 
     try {
-      await auth.signInWithEmailAndPassword(email, password);
+      // Récupérer email depuis username
+      const usernameDoc = await db.collection('usernames').doc(username).get();
+
+      if (!usernameDoc.exists) {
+        throw { code: 'username/not-found' };
+      }
+
+      const email = usernameDoc.data().email;
+      const result = await auth.signInWithEmailAndPassword(email, password);
+
+      // Vérifier si compte bloqué
+      const userDoc = await db.collection('users').doc(result.user.uid).get();
+      if (userDoc.exists && userDoc.data().estBloque) {
+        await auth.signOut();
+        await showBloqueAlert();
+        btn.disabled = false;
+        btn.innerHTML = 'SE CONNECTER <span class="material-symbols-outlined" style="font-size:18px;color:white;font-variation-settings:\'FILL\' 1,\'wght\' 400,\'GRAD\' 0,\'opsz\' 48;">arrow_forward</span>';
+        return;
+      }
+
       window.location.href = 'index.html';
+
     } catch(e) {
       btn.disabled = false;
-      btn.innerHTML = 'SE CONNECTER <span class="material-symbols-outlined" style="font-size:20px;">arrow_forward</span>';
+      btn.innerHTML = 'SE CONNECTER <span class="material-symbols-outlined" style="font-size:18px;color:white;font-variation-settings:\'FILL\' 1,\'wght\' 400,\'GRAD\' 0,\'opsz\' 48;">arrow_forward</span>';
       const msgs = {
-        'auth/user-not-found': 'Aucun compte avec cet email.',
+        'username/not-found': 'Nom d\'utilisateur introuvable.',
         'auth/wrong-password': 'Mot de passe incorrect.',
-        'auth/invalid-email': 'Adresse email invalide.',
-        'auth/invalid-credential': 'Email ou mot de passe incorrect.'
+        'auth/invalid-credential': 'Identifiants incorrects.',
+        'auth/too-many-requests': 'Trop de tentatives. Réessayez plus tard.'
       };
-      err.textContent = msgs[e.code] || 'Erreur de connexion. Réessayez.';
-      err.style.display = 'block';
+      showToast(msgs[e.code] || 'Erreur de connexion', 'error');
     }
   }
 </script>

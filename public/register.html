@@ -4,180 +4,286 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AlertBukavu — Inscription</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="style.css"/>
 <style>
   .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
-  body { min-height:max(884px,100dvh); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; background:#1c1b1b; padding:40px 0; }
+  body { min-height:max(900px,100dvh);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#1c1b1b;padding:60px 0 40px; }
+  .input-wrap { position:relative;margin-bottom:12px; }
+  .input-wrap .ms, .input-wrap .material-symbols-outlined { position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:18px;color:#906f6d;pointer-events:none; }
 </style>
 </head>
 <body>
 
-<!-- Background -->
+<!-- Background Bukavu -->
 <div style="position:absolute;inset:0;z-index:0;">
   <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMcZwNH9PaJycSQXZPnZC-_HSOTENwx0QNNE7-4uorlL8q6YbeNsaaRuiDlYXrtpzBFiZ5E6J0rXyqZmzmcGw_WsgzFEogYb16b833tuTIMJZ_MnJG-QiQqOj74IXsOK0b5CyshKxyqeTxWCyw9CK07WSrQruhyFVg7g08QNa1_ZkyN8KS3ckEP-UyucX2a8DrVeicBPEpSR8JX3nTnJ1tQCY-VGpaMlLDOZ31Bf2qGV2KZjQZCZt46bDQGhnSQuWP5xd7rlY0SYTz"
     alt="Bukavu" style="width:100%;height:100%;object-fit:cover;filter:brightness(.8) saturate(.5);"/>
-  <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.3),transparent,rgba(0,0,0,.5));"></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35),transparent,rgba(0,0,0,.5));"></div>
 </div>
 
 <main style="position:relative;z-index:10;width:100%;max-width:420px;padding:0 20px;">
-  <div style="background:white;border-radius:12px;box-shadow:0 25px 50px rgba(0,0,0,.3);padding:40px 32px 32px;position:relative;margin-top:48px;">
+  <div style="background:white;border-radius:16px;box-shadow:0 25px 60px rgba(0,0,0,.35);padding:40px 28px 28px;position:relative;margin-top:56px;">
 
     <!-- Logo flottant -->
-    <div style="position:absolute;top:-44px;left:50%;transform:translateX(-50%);width:88px;height:88px;background:white;border-radius:50%;padding:6px;box-shadow:0 4px 20px rgba(132,0,21,.2);display:flex;align-items:center;justify-content:center;">
+    <div style="position:absolute;top:-48px;left:50%;transform:translateX(-50%);width:96px;height:96px;background:white;border-radius:50%;padding:8px;box-shadow:0 4px 20px rgba(132,0,21,.25);display:flex;align-items:center;justify-content:center;">
       <div class="logo-pulse" style="width:100%;height:100%;border:3px solid #840015;border-radius:50%;display:flex;align-items:center;justify-content:center;">
-        <span class="material-symbols-outlined" style="color:#840015;font-size:38px;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 48;">emergency</span>
+        <span class="material-symbols-outlined" style="color:#840015;font-size:42px;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 48;">emergency</span>
       </div>
     </div>
 
     <!-- Titre -->
-    <div style="text-align:center;margin-bottom:24px;">
-      <h1 style="font-size:24px;font-weight:800;color:#840015;letter-spacing:-.01em;margin-bottom:4px;">Créer un compte</h1>
-      <p style="font-size:13px;color:#5b403e;font-weight:500;">Rejoignez la communauté AlertBukavu</p>
+    <div style="text-align:center;margin-bottom:20px;">
+      <h1 style="font-size:24px;font-weight:800;color:#840015;margin-bottom:4px;">Créer un compte</h1>
+      <p style="font-size:13px;color:#5b403e;">Rejoignez la communauté AlertBukavu</p>
+    </div>
+
+    <!-- Photo de profil -->
+    <div style="text-align:center;margin-bottom:20px;">
+      <img id="photoPreview" src="" alt="" class="photo-preview" style="display:none;"/>
+      <div id="avatarDefault" style="width:80px;height:80px;border-radius:50%;background:#f0eded;border:3px solid #e4bdbb;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+        <span class="material-symbols-outlined" style="font-size:36px;color:#906f6d;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 48;">person</span>
+      </div>
+      <label for="photoInput" class="photo-upload-btn" style="display:inline-flex;">
+        <span class="material-symbols-outlined" style="font-size:16px;">add_a_photo</span>
+        Ajouter une photo
+      </label>
+      <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="previewPhoto(event)"/>
+      <p style="font-size:11px;color:#906f6d;margin-top:6px;">Optionnel — Max 5 Mo</p>
     </div>
 
     <form onsubmit="return false;">
 
-      <!-- Nom -->
-      <div style="position:relative;margin-bottom:12px;">
-        <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;">
-          <span class="material-symbols-outlined" style="color:#906f6d;font-size:18px;">person</span>
-        </div>
-        <input id="nom" type="text" class="input-field" placeholder="Nom complet" style="height:52px;font-size:14px;"/>
+      <!-- Nom complet -->
+      <div class="input-wrap">
+        <span class="material-symbols-outlined">badge</span>
+        <input id="nom" type="text" class="field-input" placeholder="Nom complet" style="height:48px;font-size:14px;"/>
       </div>
 
+      <!-- Nom d'utilisateur -->
+      <div class="input-wrap" style="margin-bottom:4px;">
+        <span class="material-symbols-outlined">alternate_email</span>
+        <input id="username" type="text" class="field-input" placeholder="Nom d'utilisateur (unique)" maxlength="20" style="height:48px;font-size:14px;" oninput="verifierUsername(this.value)"/>
+      </div>
+      <p id="usernameStatus" style="font-size:11px;margin-bottom:12px;padding-left:4px;"></p>
+
       <!-- Email -->
-      <div style="position:relative;margin-bottom:12px;">
-        <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;">
-          <span class="material-symbols-outlined" style="color:#906f6d;font-size:18px;">mail</span>
-        </div>
-        <input id="email" type="email" class="input-field" placeholder="Adresse email" style="height:52px;font-size:14px;"/>
+      <div class="input-wrap">
+        <span class="material-symbols-outlined">mail</span>
+        <input id="email" type="email" class="field-input" placeholder="Adresse email" style="height:48px;font-size:14px;"/>
       </div>
 
       <!-- Téléphone -->
-      <div style="position:relative;margin-bottom:12px;">
-        <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;">
-          <span class="material-symbols-outlined" style="color:#906f6d;font-size:18px;">phone</span>
-        </div>
-        <input id="telephone" type="tel" class="input-field" placeholder="+243 ..." style="height:52px;font-size:14px;"/>
+      <div class="input-wrap" style="margin-bottom:4px;">
+        <span class="material-symbols-outlined">phone</span>
+        <input id="telephone" type="tel" class="field-input" placeholder="+243 8X XXX XXXX" style="height:48px;font-size:14px;" oninput="verifierTelephone(this.value)"/>
       </div>
+      <p id="telStatus" style="font-size:11px;margin-bottom:12px;padding-left:4px;"></p>
 
       <!-- Quartier -->
-      <div style="position:relative;margin-bottom:12px;">
-        <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;z-index:1;">
-          <span class="material-symbols-outlined" style="color:#906f6d;font-size:18px;">location_on</span>
-        </div>
-        <select id="quartier" class="input-field" style="height:52px;font-size:14px;appearance:none;padding-right:40px;cursor:pointer;">
+      <div class="input-wrap" style="margin-bottom:12px;">
+        <span class="material-symbols-outlined">location_on</span>
+        <select id="quartier" class="field-input" style="height:48px;font-size:14px;appearance:none;padding-right:36px;">
           <option value="">Votre quartier...</option>
         </select>
-        <div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;">
-          <span class="material-symbols-outlined" style="color:#906f6d;font-size:18px;">expand_more</span>
-        </div>
+        <span class="material-symbols-outlined field-arrow" style="font-size:18px;">expand_more</span>
       </div>
 
       <!-- Mot de passe -->
-      <div style="position:relative;margin-bottom:8px;">
-        <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;">
-          <span class="material-symbols-outlined" style="color:#906f6d;font-size:18px;">vpn_key</span>
-        </div>
-        <input id="password" type="password" class="input-field" placeholder="Mot de passe (min. 6 car.)" style="height:52px;font-size:14px;padding-right:44px;"/>
-        <button type="button" onclick="togglePwd()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#906f6d;">
+      <div class="input-wrap" style="margin-bottom:6px;">
+        <span class="material-symbols-outlined">vpn_key</span>
+        <input id="password" type="password" class="field-input" placeholder="Mot de passe (min. 8 car.)" style="height:48px;font-size:14px;padding-right:44px;"/>
+        <button type="button" onclick="togglePwd()" style="position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#906f6d;">
           <span class="material-symbols-outlined" id="eyeIcon" style="font-size:18px;">visibility</span>
         </button>
       </div>
 
-      <!-- Erreur -->
-      <div id="errorMsg" style="display:none;background:#ffdad6;border:1px solid #ba1a1a;border-radius:8px;padding:10px 14px;margin-bottom:14px;color:#93000a;font-size:13px;font-weight:500;"></div>
+      <!-- Barre force mot de passe -->
+      <div id="pwdStrengthBar" style="height:4px;border-radius:2px;background:#f0eded;margin-bottom:14px;overflow:hidden;">
+        <div id="pwdStrengthFill" style="height:100%;width:0%;border-radius:2px;transition:all .3s;"></div>
+      </div>
 
-      <button type="button" id="btnRegister" class="btn-primary" onclick="register()" style="margin-top:12px;font-size:16px;">
+      <button type="button" id="btnRegister" class="btn-primary" onclick="register()" style="font-size:15px;height:50px;">
         CRÉER MON COMPTE
-        <span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span>
+        <span class="material-symbols-outlined" style="font-size:18px;color:white;">arrow_forward</span>
       </button>
-
     </form>
 
-    <div style="margin-top:20px;text-align:center;">
-      <a href="login.html" style="font-size:13px;font-weight:600;color:#840015;text-decoration:underline;text-underline-offset:3px;">
-        Déjà un compte ? Se connecter
-      </a>
+    <div style="margin-top:16px;text-align:center;">
+      <a href="login.html" style="font-size:13px;font-weight:600;color:#840015;text-decoration:underline;text-underline-offset:3px;">Déjà un compte ? Se connecter</a>
     </div>
-
   </div>
 
-  <div style="margin-top:16px;text-align:center;color:rgba(255,255,255,.7);font-size:11px;font-weight:500;text-shadow:0 1px 3px rgba(0,0,0,.5);">
+  <div style="margin-top:16px;text-align:center;color:rgba(255,255,255,.7);font-size:11px;text-shadow:0 1px 3px rgba(0,0,0,.5);">
     AlertBukavu • Réseau communautaire • Bukavu, RDC
   </div>
 </main>
 
 <script src="firebase-config.js"></script>
 <script>
-  redirectIfAuth();
+redirectIfAuth();
 
-  // Remplir quartiers
-  const sel = document.getElementById('quartier');
-  QUARTIERS.forEach(q => {
-    const opt = document.createElement('option');
-    opt.value = q; opt.textContent = q;
-    sel.appendChild(opt);
-  });
+// Remplir quartiers
+const sel = document.getElementById('quartier');
+QUARTIERS.forEach(q => { const o = document.createElement('option'); o.value = q; o.textContent = q; sel.appendChild(o); });
 
-  function togglePwd() {
-    const input = document.getElementById('password');
-    const icon = document.getElementById('eyeIcon');
-    input.type = input.type === 'password' ? 'text' : 'password';
-    icon.textContent = input.type === 'password' ? 'visibility' : 'visibility_off';
+// Preview photo
+function previewPhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('Image trop lourde (max 5 Mo)', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const preview = document.getElementById('photoPreview');
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+    document.getElementById('avatarDefault').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// Toggle password
+function togglePwd() {
+  const input = document.getElementById('password');
+  const icon = document.getElementById('eyeIcon');
+  input.type = input.type === 'password' ? 'text' : 'password';
+  icon.textContent = input.type === 'password' ? 'visibility' : 'visibility_off';
+}
+
+// Force mot de passe
+document.getElementById('password').addEventListener('input', function() {
+  const pwd = this.value;
+  let score = 0;
+  if (pwd.length >= 8) score++;
+  if (/[A-Z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+  const colors = ['#FF3D71','#FF9F43','#FFD43B','#00C48C'];
+  const widths = ['25%','50%','75%','100%'];
+  const fill = document.getElementById('pwdStrengthFill');
+  fill.style.width = score > 0 ? widths[score-1] : '0%';
+  fill.style.background = score > 0 ? colors[score-1] : '';
+});
+
+// Vérification username
+let usernameTimer;
+async function verifierUsername(val) {
+  const status = document.getElementById('usernameStatus');
+  clearTimeout(usernameTimer);
+  if (!val) { status.textContent = ''; return; }
+  if (!validerUsername(val)) {
+    status.textContent = '3-20 caractères, lettres, chiffres ou _';
+    status.style.color = '#FF3D71';
+    return;
   }
-
-  async function register() {
-    const nom = document.getElementById('nom').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const telephone = document.getElementById('telephone').value.trim();
-    const quartier = document.getElementById('quartier').value;
-    const password = document.getElementById('password').value;
-    const btn = document.getElementById('btnRegister');
-    const err = document.getElementById('errorMsg');
-
-    err.style.display = 'none';
-
-    function showErr(msg) { err.textContent = msg; err.style.display = 'block'; }
-
-    if (!nom) { showErr('Le nom complet est requis.'); return; }
-    if (!email) { showErr('L\'adresse email est requise.'); return; }
-    if (!telephone) { showErr('Le numéro de téléphone est requis.'); return; }
-    if (!quartier) { showErr('Choisissez votre quartier.'); return; }
-    if (password.length < 6) { showErr('Mot de passe : minimum 6 caractères.'); return; }
-
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>&nbsp;Création...';
-
-    try {
-      const result = await auth.createUserWithEmailAndPassword(email, password);
-      const uid = result.user.uid;
-
-      // Sauvegarder le profil (sans bloquer)
-      db.collection('users').doc(uid).set({
-        nom, email, telephone, quartier,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        nbAlertes: 0, nbConfirmations: 0
-      }).catch(console.error);
-
-      window.location.href = 'index.html';
-
-    } catch(e) {
-      btn.disabled = false;
-      btn.innerHTML = 'CRÉER MON COMPTE <span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span>';
-      const msgs = {
-        'auth/email-already-in-use': 'Cet email est déjà utilisé.',
-        'auth/invalid-email': 'Adresse email invalide.',
-        'auth/weak-password': 'Mot de passe trop faible.'
-      };
-      showErr(msgs[e.code] || 'Une erreur est survenue.');
+  status.textContent = 'Vérification...';
+  status.style.color = '#906f6d';
+  usernameTimer = setTimeout(async () => {
+    const dispo = await usernameDisponible(val);
+    if (dispo) {
+      status.textContent = '@' + val + ' est disponible';
+      status.style.color = '#00C48C';
+    } else {
+      status.textContent = '@' + val + ' est déjà utilisé';
+      status.style.color = '#FF3D71';
     }
+  }, 600);
+}
+
+// Vérification téléphone
+function verifierTelephone(val) {
+  const status = document.getElementById('telStatus');
+  if (!val) { status.textContent = ''; return; }
+  if (validerTelephoneRDC(val)) {
+    status.textContent = 'Numéro RDC valide';
+    status.style.color = '#00C48C';
+  } else {
+    status.textContent = 'Numéro invalide — format: +243 8X XXX XXXX';
+    status.style.color = '#FF3D71';
   }
+}
+
+async function register() {
+  const nom = document.getElementById('nom').value.trim();
+  const username = document.getElementById('username').value.trim().toLowerCase();
+  const email = document.getElementById('email').value.trim();
+  const telephone = document.getElementById('telephone').value.trim();
+  const quartier = document.getElementById('quartier').value;
+  const password = document.getElementById('password').value;
+  const photoFile = document.getElementById('photoInput').files[0];
+  const btn = document.getElementById('btnRegister');
+
+  // Validations
+  if (!nom) { showToast('Le nom complet est requis', 'error'); return; }
+  if (!validerUsername(username)) { showToast('Nom d\'utilisateur invalide (3-20 car., lettres/chiffres/_)', 'error'); return; }
+  if (!email) { showToast('L\'email est requis', 'error'); return; }
+  if (!validerTelephoneRDC(telephone)) { showToast('Numéro de téléphone RDC invalide', 'error'); return; }
+  if (!quartier) { showToast('Choisissez votre quartier', 'error'); return; }
+  if (password.length < 8) { showToast('Mot de passe trop court (min. 8 caractères)', 'error'); return; }
+
+  // Vérifier username disponible
+  const dispo = await usernameDisponible(username);
+  if (!dispo) { showToast('Ce nom d\'utilisateur est déjà pris', 'error'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>&nbsp;Création du compte...';
+
+  try {
+    // Créer le compte Firebase Auth
+    const result = await auth.createUserWithEmailAndPassword(email, password);
+    const uid = result.user.uid;
+
+    // Upload photo si fournie
+    let photoUrl = null;
+    if (photoFile) {
+      try {
+        btn.innerHTML = '<span class="spinner"></span>&nbsp;Upload photo...';
+        photoUrl = await uploadImage(photoFile, 'profils');
+      } catch(e) {
+        console.warn('Upload photo échoué, on continue sans photo');
+      }
+    }
+
+    // Sauvegarder profil
+    await db.collection('users').doc(uid).set({
+      nom, username,
+      email, telephone: normaliserTelephone(telephone),
+      quartier, photoUrl,
+      estBloque: false,
+      nbAlertes: 0, nbConfirmations: 0, nbFaussesAlertes: 0,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Index username pour la recherche à la connexion
+    await db.collection('usernames').doc(username).set({ uid, email });
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Compte créé !',
+      text: `Bienvenue sur AlertBukavu, @${username} !`,
+      confirmButtonColor: '#840015',
+      confirmButtonText: 'Commencer'
+    });
+
+    window.location.href = 'index.html';
+
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = 'CRÉER MON COMPTE <span class="material-symbols-outlined" style="font-size:18px;color:white;">arrow_forward</span>';
+    const msgs = {
+      'auth/email-already-in-use': 'Cet email est déjà utilisé.',
+      'auth/invalid-email': 'Adresse email invalide.',
+      'auth/weak-password': 'Mot de passe trop faible.'
+    };
+    showToast(msgs[e.code] || 'Une erreur est survenue : ' + e.message, 'error');
+  }
+}
 </script>
 </body>
 </html>
