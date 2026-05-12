@@ -80,9 +80,12 @@
       </div>
 
       <!-- Téléphone -->
-      <div class="input-wrap" style="margin-bottom:4px;">
+      <div class="input-wrap" style="margin-bottom:4px;position:relative;">
         <span class="material-symbols-outlined">phone</span>
-        <input id="telephone" type="tel" class="field-input" placeholder="+243 8X XXX XXXX" style="height:48px;font-size:14px;" oninput="verifierTelephone(this.value)"/>
+        <div style="display:flex;align-items:center;position:relative;">
+          <span style="position:absolute;left:48px;color:#906f6d;font-size:14px;font-weight:500;pointer-events:none;">+243</span>
+          <input id="telephone" type="tel" class="field-input" placeholder="8XX XXX XXXX" maxlength="11" style="height:48px;font-size:14px;padding-left:108px;" oninput="verifierTelephone(this.value)"/>
+        </div>
       </div>
       <p id="telStatus" style="font-size:11px;margin-bottom:12px;padding-left:4px;"></p>
 
@@ -199,13 +202,18 @@ async function verifierUsername(val) {
 // Vérification téléphone
 function verifierTelephone(val) {
   const status = document.getElementById('telStatus');
-  if (!val) { status.textContent = ''; return; }
-  if (validerTelephoneRDC(val)) {
-    status.textContent = 'Numéro RDC valide';
+  const input = document.getElementById('telephone');
+  if (!val) { status.textContent = ''; input.style.borderColor = ''; return; }
+  // Valider avec +243 préfixe
+  const fullPhone = '+243' + val;
+  if (validerTelephoneRDC(fullPhone)) {
+    status.textContent = '✓ Numéro valide';
     status.style.color = '#00C48C';
+    input.style.borderColor = '#00C48C';
   } else {
-    status.textContent = 'Numéro invalide — format: +243 8X XXX XXXX';
+    status.textContent = '✗ Format invalide (8XX XXX XXXX)';
     status.style.color = '#FF3D71';
+    input.style.borderColor = '#FF3D71';
   }
 }
 
@@ -213,17 +221,18 @@ async function register() {
   const nom = document.getElementById('nom').value.trim();
   const username = document.getElementById('username').value.trim().toLowerCase();
   const email = document.getElementById('email').value.trim();
-  const telephone = document.getElementById('telephone').value.trim();
+  const telephone = '+243' + document.getElementById('telephone').value.trim();
   const quartier = document.getElementById('quartier').value;
   const password = document.getElementById('password').value;
   const photoFile = document.getElementById('photoInput').files[0];
   const btn = document.getElementById('btnRegister');
+  const btnHTML = btn.innerHTML;
 
   // Validations
   if (!nom) { showToast('Le nom complet est requis', 'error'); return; }
   if (!validerUsername(username)) { showToast('Nom d\'utilisateur invalide (3-20 car., lettres/chiffres/_)', 'error'); return; }
   if (!email) { showToast('L\'email est requis', 'error'); return; }
-  if (!validerTelephoneRDC(telephone)) { showToast('Numéro de téléphone RDC invalide', 'error'); return; }
+  if (!validerTelephoneRDC(telephone)) { showToast('Numéro de téléphone invalide (format: 8XX XXX XXXX)', 'error'); return; }
   if (!quartier) { showToast('Choisissez votre quartier', 'error'); return; }
   if (password.length < 8) { showToast('Mot de passe trop court (min. 8 caractères)', 'error'); return; }
 
@@ -233,6 +242,11 @@ async function register() {
 
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>&nbsp;Création du compte...';
+  const timeout = setTimeout(() => {
+    btn.disabled = false;
+    btn.innerHTML = btnHTML;
+    showToast('Délai d\'attente dépassé. Réessayez.', 'error');
+  }, 20000);
 
   try {
     // Créer le compte Firebase Auth
@@ -246,7 +260,7 @@ async function register() {
         btn.innerHTML = '<span class="spinner"></span>&nbsp;Upload photo...';
         photoUrl = await uploadImage(photoFile, 'profils');
       } catch(e) {
-        console.warn('Upload photo échoué, on continue sans photo');
+        console.warn('Upload photo échoué, on continue sans photo', e);
       }
     }
 
@@ -254,7 +268,7 @@ async function register() {
     await db.collection('users').doc(uid).set({
       nom, username,
       email, telephone: normaliserTelephone(telephone),
-      quartier, photoUrl,
+      quartier, photoUrl: photoUrl || null,
       estBloque: false,
       nbAlertes: 0, nbConfirmations: 0, nbFaussesAlertes: 0,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -263,25 +277,29 @@ async function register() {
     // Index username pour la recherche à la connexion
     await db.collection('usernames').doc(username).set({ uid, email });
 
+    clearTimeout(timeout);
     await Swal.fire({
       icon: 'success',
       title: 'Compte créé !',
       text: `Bienvenue sur AlertBukavu, @${username} !`,
       confirmButtonColor: '#840015',
-      confirmButtonText: 'Commencer'
+      confirmButtonText: 'Commencer',
+      allowOutsideClick: false
     });
 
     window.location.href = 'index.html';
 
   } catch(e) {
+    clearTimeout(timeout);
     btn.disabled = false;
-    btn.innerHTML = 'CRÉER MON COMPTE <span class="material-symbols-outlined" style="font-size:18px;color:white;">arrow_forward</span>';
+    btn.innerHTML = btnHTML;
     const msgs = {
       'auth/email-already-in-use': 'Cet email est déjà utilisé.',
       'auth/invalid-email': 'Adresse email invalide.',
-      'auth/weak-password': 'Mot de passe trop faible.'
+      'auth/weak-password': 'Mot de passe trop faible.',
+      'auth/operation-not-allowed': 'Création de compte temporairement indisponible.'
     };
-    showToast(msgs[e.code] || 'Une erreur est survenue : ' + e.message, 'error');
+    showToast(msgs[e.code] || 'Erreur: ' + (e.message || e.code), 'error');
   }
 }
 </script>

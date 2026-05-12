@@ -188,6 +188,7 @@ async function publier() {
   const description = document.getElementById('description').value.trim();
   const quartier = document.getElementById('quartier').value;
   const btn = document.getElementById('btnPublier');
+  const btnHTML = btn.innerHTML;
 
   if (!titre) { showToast('Le titre est obligatoire', 'error'); return; }
   if (!categorieChoisie) { showToast('Choisissez une catégorie', 'error'); return; }
@@ -204,13 +205,19 @@ async function publier() {
       confirmButtonColor: '#840015',
       cancelButtonColor: '#906f6d',
       confirmButtonText: 'Oui, c\'est une urgence',
-      cancelButtonText: 'Annuler'
+      cancelButtonText: 'Annuler',
+      allowOutsideClick: false
     });
     if (!result.isConfirmed) return;
   }
 
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>&nbsp;Publication...';
+  const timeout = setTimeout(() => {
+    btn.disabled = false;
+    btn.innerHTML = btnHTML;
+    showToast('Délai d\'attente dépassé. Réessayez.', 'error');
+  }, 20000);
 
   try {
     let nomUser = currentUserData?.nom || currentUser.email;
@@ -233,7 +240,7 @@ async function publier() {
       userId: currentUser.uid,
       userNom: nomUser,
       userUsername: usernameUser,
-      userPhotoUrl: photoUser,
+      userPhot: imageUrl || nulloUrl: photoUser,
       imageUrl,
       nbConfirmations: 0,
       nbSignalements: 0,
@@ -243,7 +250,7 @@ async function publier() {
     db.collection('users').doc(currentUser.uid).update({
       nbAlertes: firebase.firestore.FieldValue.increment(1)
     }).catch(() => {});
-
+clearTimeout(timeout);
     await Swal.fire({
       icon: 'success',
       title: 'Alerte publiée !',
@@ -251,12 +258,15 @@ async function publier() {
       confirmButtonColor: '#840015',
       timer: 2500,
       timerProgressBar: true,
+      showConfirmButton: false,
+      allowOutsideClick true,
       showConfirmButton: false
     });
 
-    window.location.href = 'index.html';
-
-  } catch(e) {
+    clearTimeout(timeout);
+    btn.disabled = false;
+    btn.innerHTML = btnHTML;
+    showToast('Erreur: ' + (e.message || e.code || 'Échec de la publication')
     btn.disabled = false;
     btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;color:white;">add_alert</span> PUBLIER L\'ALERTE';
     showToast('Erreur lors de la publication : ' + e.message, 'error');

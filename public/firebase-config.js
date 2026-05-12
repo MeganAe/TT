@@ -58,6 +58,7 @@ function validerTelephoneRDC(tel) {
     // Nettoyer le numéro
     const clean = tel.replace(/[\s\-\(\)]/g, '');
     // Formats valides RDC: +243XXXXXXXXX ou 0XXXXXXXXX ou 243XXXXXXXXX
+    // Format: +243 8X XXX XXXX (11 digits after +243)
     const regex = /^(\+243|243|0)(8[1-9]|9[0-9])\d{7}$/;
     return regex.test(clean);
 }

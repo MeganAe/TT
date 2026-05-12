@@ -112,18 +112,25 @@
     const username = document.getElementById('username').value.trim().toLowerCase();
     const password = document.getElementById('password').value;
     const btn = document.getElementById('btnLogin');
+    const btnHTML = btn.innerHTML;
 
     if (!username) { showToast('Entrez votre nom d\'utilisateur', 'error'); return; }
     if (!password) { showToast('Entrez votre mot de passe', 'error'); return; }
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>&nbsp;Connexion...';
+    const timeout = setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = btnHTML;
+      showToast('Délai d\'attente dépassé. Réessayez.', 'error');
+    }, 15000);
 
     try {
       // Récupérer email depuis username
       const usernameDoc = await db.collection('usernames').doc(username).get();
 
       if (!usernameDoc.exists) {
+        clearTimeout(timeout);
         throw { code: 'username/not-found' };
       }
 
@@ -133,25 +140,28 @@
       // Vérifier si compte bloqué
       const userDoc = await db.collection('users').doc(result.user.uid).get();
       if (userDoc.exists && userDoc.data().estBloque) {
+        clearTimeout(timeout);
         await auth.signOut();
-        await showBloqueAlert();
         btn.disabled = false;
-        btn.innerHTML = 'SE CONNECTER <span class="material-symbols-outlined" style="font-size:18px;color:white;font-variation-settings:\'FILL\' 1,\'wght\' 400,\'GRAD\' 0,\'opsz\' 48;">arrow_forward</span>';
+        btn.innerHTML = btnHTML;
+        await showBloqueAlert();
         return;
       }
 
+      clearTimeout(timeout);
       window.location.href = 'index.html';
 
     } catch(e) {
+      clearTimeout(timeout);
       btn.disabled = false;
-      btn.innerHTML = 'SE CONNECTER <span class="material-symbols-outlined" style="font-size:18px;color:white;font-variation-settings:\'FILL\' 1,\'wght\' 400,\'GRAD\' 0,\'opsz\' 48;">arrow_forward</span>';
+      btn.innerHTML = btnHTML;
       const msgs = {
         'username/not-found': 'Nom d\'utilisateur introuvable.',
         'auth/wrong-password': 'Mot de passe incorrect.',
         'auth/invalid-credential': 'Identifiants incorrects.',
         'auth/too-many-requests': 'Trop de tentatives. Réessayez plus tard.'
       };
-      showToast(msgs[e.code] || 'Erreur de connexion', 'error');
+      showToast(msgs[e.code] || 'Erreur de connexion: ' + (e.message || e.code), 'error');
     }
   }
 </script>
