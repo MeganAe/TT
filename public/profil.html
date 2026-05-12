@@ -29,15 +29,8 @@
   </div>
 </header>
 
-<!-- Hero avec photo -->
+<!-- Hero sans photo -->
 <section style="background:#840015;padding:24px 20px 56px;text-align:center;position:relative;">
-  <div style="position:relative;display:inline-block;margin-bottom:14px;">
-    <img id="profilePhoto" src="" alt="Photo de profil" style="width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.4);box-shadow:0 4px 20px rgba(0,0,0,.2);"/>
-    <label for="photoChangeInput" style="position:absolute;bottom:0;right:0;width:28px;height:28px;background:#840015;border:2px solid white;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-      <span class="material-symbols-outlined" style="font-size:14px;color:white;">edit</span>
-    </label>
-    <input type="file" id="photoChangeInput" accept="image/*" style="display:none;" onchange="changerPhoto(event)"/>
-  </div>
   <h2 id="nomUser" style="font-size:20px;font-weight:800;color:white;margin-bottom:2px;">Chargement...</h2>
   <p id="usernameUser" style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:8px;"></p>
   <p id="emailUser" style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:10px;"></p>
@@ -112,51 +105,14 @@ requireAuth().then(async user => {
       document.getElementById('nbAlertes').textContent = d.nbAlertes || 0;
       document.getElementById('nbConfirmations').textContent = d.nbConfirmations || 0;
       document.getElementById('nbFausses').textContent = d.nbFaussesAlertes || 0;
-
-      // Photo de profil
-      const photo = document.getElementById('profilePhoto');
-      photo.src = getPhotoUrl(d, 88);
-      photo.onerror = () => { photo.src = genererAvatar(d.nom || 'U', 88); };
     }
   } catch(e) {
     document.getElementById('nomUser').textContent = user.email;
-    document.getElementById('profilePhoto').src = genererAvatar(user.email, 88);
   }
   chargerMesAlertes(user.uid);
 });
 
-async function changerPhoto(event) {
-  const file = event.target.files[0];
-  if (!file || !currentUser) return;
-  if (file.size > 5 * 1024 * 1024) { showToast('Image trop lourde (max 5 Mo)', 'error'); return; }
-
-  const result = await Swal.fire({
-    title: 'Changer la photo ?',
-    text: 'Cette photo sera visible sur toutes vos alertes.',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#840015',
-    cancelButtonColor: '#906f6d',
-    confirmButtonText: 'Oui, changer',
-    cancelButtonText: 'Annuler'
-  });
-  if (!result.isConfirmed) return;
-
-  try {
-    showToast('Upload en cours...', 'info');
-    const url = await uploadImage(file, 'profils');
-
-    await db.collection('users').doc(currentUser.uid).update({ photoUrl: url });
-
-    const photo = document.getElementById('profilePhoto');
-    photo.src = url;
-    showToast('Photo de profil mise à jour !');
-  } catch(e) {
-    showToast('Erreur lors de l\'upload', 'error');
-  }
-}
-
-function statutStyle(s) {
+async function statutStyle(s) {
   const styles = {
     en_attente: { label:'En attente', bg:'#FFF5EC', color:'#FF9F43' },
     confirmee:  { label:'Confirmée',  bg:'#E6FAF5', color:'#00C48C' },
