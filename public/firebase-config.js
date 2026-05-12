@@ -55,18 +55,14 @@ const URGENCES = {
 
 // ==== VALIDATION ====
 function validerTelephoneRDC(tel) {
-    // Nettoyer le numéro
+    // RDC = +243 suivi exactement de 9 chiffres
     const clean = tel.replace(/[\s\-\(\)]/g, '');
-    // Formats valides RDC: +243XXXXXXXXX ou 0XXXXXXXXX ou 243XXXXXXXXX
-    const regex = /^(\+243|243|0)(8[1-9]|9[0-9])\d{7}$/;
-    return regex.test(clean);
+    return /^\+243[0-9]{9}$/.test(clean);
 }
 
-function normaliserTelephone(tel) {
-    const clean = tel.replace(/[\s\-\(\)]/g, '');
-    if (clean.startsWith('+243')) return clean;
-    if (clean.startsWith('243')) return '+' + clean;
-    if (clean.startsWith('0')) return '+243' + clean.substring(1);
+function normaliserTelephone(digits9) {
+    // digits9 = les 9 chiffres saisis après +243
+    const clean = String(digits9).replace(/\D/g, '');
     return '+243' + clean;
 }
 
