@@ -22,8 +22,8 @@
 
 <header class="top-bar">
   <div style="display:flex;align-items:center;gap:10px;">
-    <span class="material-symbols-outlined" style="font-size:20px;color:white;">emergency</span>
-    <h1 style="font-size:17px;font-weight:800;color:white;">Statistiques</h1>
+    <span class="material-symbols-outlined" style="font-size:22px;color:white;">notification_important</span>
+    <h1 style="font-size:17px;font-weight:800;color:white;">AlertBukavu</h1>
   </div>
 </header>
 
@@ -92,7 +92,10 @@
 
 <script src="firebase-config.js"></script>
 <script>
-requireAuth().then(() => chargerStats());
+requireAuth().then(user => {
+  afficherMenuAdmin(false, user);
+  chargerStats();
+});
 
 function ligne(label, count, total, color) {
   const pct = total > 0 ? Math.round(count / total * 100) : 0;

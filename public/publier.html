@@ -24,8 +24,8 @@
     <button onclick="history.back()" style="background:none;border:none;cursor:pointer;color:white;display:flex;align-items:center;">
       <span class="material-symbols-outlined" style="font-size:22px;color:white;">arrow_back</span>
     </button>
-    <span class="material-symbols-outlined" style="font-size:20px;color:white;">emergency</span>
-    <h1 style="font-size:17px;font-weight:800;color:white;">Publier une alerte</h1>
+    <span class="material-symbols-outlined" style="font-size:22px;color:white;">notification_important</span>
+    <h1 style="font-size:17px;font-weight:800;color:white;">AlertBukavu</h1>
   </div>
 </header>
 
@@ -126,6 +126,7 @@ let imageFile = null;
 
 requireAuth().then(async user => {
   currentUser = user;
+  afficherMenuAdmin(false, user);
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (doc.exists) currentUserData = doc.data();

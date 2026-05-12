@@ -11,6 +11,37 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// ==== ADMINISTRATION ====
+const ADMIN_UIDS = ['xofFgfRyh8QdhMp8fUYNfKrFv843'];
+const MAX_ADMINS = 5;
+
+async function userEstAdmin(user) {
+    if (!user) return false;
+    if (ADMIN_UIDS.includes(user.uid)) return true;
+    try {
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (!doc.exists) return false;
+        const data = doc.data();
+        return data.role === 'admin' || data.estAdmin === true;
+    } catch(e) {
+        return false;
+    }
+}
+
+async function afficherMenuAdmin(active = false, user = auth.currentUser) {
+    const nav = document.querySelector('.bottom-nav');
+    if (!nav || !user || document.getElementById('adminNavItem')) return;
+    const isAdmin = await userEstAdmin(user);
+    if (!isAdmin) return;
+
+    const link = document.createElement('a');
+    link.href = 'admin.html';
+    link.id = 'adminNavItem';
+    link.className = active ? 'nav-item active' : 'nav-item';
+    link.innerHTML = `<span class="material-symbols-outlined ${active ? '' : 'ms-o'}" style="font-size:22px;font-variation-settings:'FILL' ${active ? 1 : 0},'wght' 400,'GRAD' 0,'opsz' 24;">admin_panel_settings</span><span>Moderation</span>`;
+    nav.appendChild(link);
+}
+
 // ==== CLOUDINARY CONFIG ====
 // Remplace par tes vraies valeurs après création du compte
 const CLOUDINARY_CLOUD_NAME = 'duxhbgs3d';
