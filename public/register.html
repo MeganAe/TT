@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="style.css"/>
 <style>
   .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
-  body { min-height:max(900px,100dvh);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#1c1b1b;padding:60px 0 40px; }
+  body { min-height:100dvh;display:flex;align-items:center;justify-content:flex-start;position:relative;overflow-y:auto;background:#1c1b1b;flex-direction:column;padding:40px 0; }
   .input-wrap { position:relative;margin-bottom:12px; }
   .input-wrap .ms, .input-wrap .material-symbols-outlined { position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:18px;color:#906f6d;pointer-events:none; }
 </style>
@@ -204,14 +204,14 @@ function verifierTelephone(val) {
   const status = document.getElementById('telStatus');
   const input = document.getElementById('telephone');
   if (!val) { status.textContent = ''; input.style.borderColor = ''; return; }
-  // Valider avec +243 préfixe
+  // Vérifier qu'il y a au moins 7 chiffres
   const fullPhone = '+243' + val;
-  if (validerTelephoneRDC(fullPhone)) {
-    status.textContent = '✓ Numéro valide';
+  if (/\d{7,}/.test(val)) {
+    status.textContent = '✓ Numéro accepté';
     status.style.color = '#00C48C';
     input.style.borderColor = '#00C48C';
   } else {
-    status.textContent = '✗ Format invalide (8XX XXX XXXX)';
+    status.textContent = '✗ Au moins 7 chiffres requis';
     status.style.color = '#FF3D71';
     input.style.borderColor = '#FF3D71';
   }
