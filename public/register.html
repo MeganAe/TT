@@ -14,294 +14,351 @@
 <link rel="stylesheet" href="style.css"/>
 <style>
   .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
-  body { min-height:100dvh;display:flex;align-items:center;justify-content:flex-start;position:relative;overflow-y:auto;background:#1c1b1b;flex-direction:column;padding:40px 0; }
+
+  html, body { height:100%; margin:0; overflow:hidden; }
+
+  .bg-wrap { position:fixed;inset:0;z-index:0; }
+  .bg-wrap img {
+    width:100%;height:100%;object-fit:cover;
+    filter:brightness(.8) saturate(.5);
+    animation:bgZoom 20s ease-in-out infinite alternate;
+    transform-origin:center;
+  }
+  @keyframes bgZoom { from{transform:scale(1)} to{transform:scale(1.06)} }
+  .bg-overlay { position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.2),rgba(0,0,0,.05) 40%,rgba(0,0,0,.5)); }
+
+  .scroll-area {
+    position:relative;z-index:10;height:100%;overflow-y:auto;
+    display:flex;align-items:flex-start;justify-content:center;
+    padding:40px 20px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .scroll-area::-webkit-scrollbar { display:none; }
+
+  .card-reg {
+    background:white;border-radius:20px;
+    box-shadow:0 30px 70px rgba(0,0,0,.35);
+    padding:52px 28px 28px;
+    position:relative;width:100%;max-width:420px;
+    animation:cardIn .5s cubic-bezier(.22,1,.36,1) both;
+    margin-bottom:20px;
+  }
+  @keyframes cardIn { from{opacity:0;transform:translateY(32px) scale(.97)} to{opacity:1;transform:none} }
+
+  .floating-logo {
+    position:absolute;top:-52px;left:50%;transform:translateX(-50%);
+    width:104px;height:104px;background:white;border-radius:50%;
+    padding:9px;box-shadow:0 6px 28px rgba(132,0,21,.28);
+    display:flex;align-items:center;justify-content:center;
+  }
+
   .input-wrap { position:relative;margin-bottom:12px; }
-  .input-wrap .ms, .input-wrap .material-symbols-outlined { position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:18px;color:#906f6d;pointer-events:none; }
+  .input-wrap .ico {
+    position:absolute;left:14px;top:50%;transform:translateY(-50%);
+    font-size:18px;color:#906f6d;pointer-events:none;transition:color .2s;
+  }
+  .field-input {
+    width:100%;height:50px;padding:0 16px 0 48px;
+    background:#f6f3f2;border:1.5px solid #e4bdbb;border-radius:10px;
+    font-size:14px;font-family:'Inter',sans-serif;color:#1c1b1b;
+    outline:none;transition:border-color .2s,box-shadow .2s;box-sizing:border-box;
+  }
+  .field-input:focus {
+    border-color:#840015;box-shadow:0 0 0 3px rgba(132,0,21,.1);background:white;
+  }
+  .field-input:focus ~ .ico { color:#840015; }
+  .field-input::placeholder { color:rgba(91,64,62,.45); }
+
+  /* Champ téléphone spécial */
+  .tel-wrap { position:relative;margin-bottom:4px; }
+  .tel-prefix {
+    position:absolute;left:0;top:0;bottom:0;
+    width:76px;display:flex;align-items:center;justify-content:center;
+    background:#ffdad8;border:1.5px solid #e4bdbb;border-right:none;
+    border-radius:10px 0 0 10px;
+    font-size:14px;font-weight:700;color:#840015;pointer-events:none;
+    user-select:none;
+  }
+  .tel-input {
+    width:100%;height:50px;padding:0 16px 0 84px;
+    background:#f6f3f2;border:1.5px solid #e4bdbb;border-radius:10px;
+    font-size:14px;font-family:'Inter',sans-serif;color:#1c1b1b;
+    outline:none;transition:border-color .2s,box-shadow .2s;box-sizing:border-box;
+  }
+  .tel-input:focus {
+    border-color:#840015;box-shadow:0 0 0 3px rgba(132,0,21,.1);background:white;
+  }
+  .tel-input::placeholder { color:rgba(91,64,62,.45); }
 </style>
 </head>
 <body>
 
-<!-- Background Bukavu -->
-<div style="position:absolute;inset:0;z-index:0;">
-  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMcZwNH9PaJycSQXZPnZC-_HSOTENwx0QNNE7-4uorlL8q6YbeNsaaRuiDlYXrtpzBFiZ5E6J0rXyqZmzmcGw_WsgzFEogYb16b833tuTIMJZ_MnJG-QiQqOj74IXsOK0b5CyshKxyqeTxWCyw9CK07WSrQruhyFVg7g08QNa1_ZkyN8KS3ckEP-UyucX2a8DrVeicBPEpSR8JX3nTnJ1tQCY-VGpaMlLDOZ31Bf2qGV2KZjQZCZt46bDQGhnSQuWP5xd7rlY0SYTz"
-    alt="Bukavu" style="width:100%;height:100%;object-fit:cover;filter:brightness(.8) saturate(.5);"/>
-  <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35),transparent,rgba(0,0,0,.5));"></div>
+<div class="bg-wrap">
+  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMcZwNH9PaJycSQXZPnZC-_HSOTENwx0QNNE7-4uorlL8q6YbeNsaaRuiDlYXrtpzBFiZ5E6J0rXyqZmzmcGw_WsgzFEogYb16b833tuTIMJZ_MnJG-QiQqOj74IXsOK0b5CyshKxyqeTxWCyw9CK07WSrQruhyFVg7g08QNa1_ZkyN8KS3ckEP-UyucX2a8DrVeicBPEpSR8JX3nTnJ1tQCY-VGpaMlLDOZ31Bf2qGV2KZjQZCZt46bDQGhnSQuWP5xd7rlY0SYTz" alt="Bukavu"/>
+  <div class="bg-overlay"></div>
 </div>
 
-<main style="position:relative;z-index:10;width:100%;max-width:420px;padding:0 20px;">
-  <div style="background:white;border-radius:16px;box-shadow:0 25px 60px rgba(0,0,0,.35);padding:40px 28px 28px;position:relative;margin-top:56px;">
+<div class="scroll-area">
+  <div style="width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;">
 
-    <!-- Logo flottant -->
-    <div style="position:absolute;top:-48px;left:50%;transform:translateX(-50%);width:96px;height:96px;background:white;border-radius:50%;padding:8px;box-shadow:0 4px 20px rgba(132,0,21,.25);display:flex;align-items:center;justify-content:center;">
-      <div class="logo-pulse" style="width:100%;height:100%;border:3px solid #840015;border-radius:50%;display:flex;align-items:center;justify-content:center;">
-        <span class="material-symbols-outlined" style="color:#840015;font-size:42px;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 48;">emergency</span>
-      </div>
-    </div>
+    <div class="card-reg">
 
-    <!-- Titre -->
-    <div style="text-align:center;margin-bottom:20px;">
-      <h1 style="font-size:24px;font-weight:800;color:#840015;margin-bottom:4px;">Créer un compte</h1>
-      <p style="font-size:13px;color:#5b403e;">Rejoignez la communauté AlertBukavu</p>
-    </div>
-
-    <!-- Photo de profil -->
-    <div style="text-align:center;margin-bottom:20px;">
-      <img id="photoPreview" src="" alt="" class="photo-preview" style="display:none;"/>
-      <div id="avatarDefault" style="width:80px;height:80px;border-radius:50%;background:#f0eded;border:3px solid #e4bdbb;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
-        <span class="material-symbols-outlined" style="font-size:36px;color:#906f6d;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 48;">person</span>
-      </div>
-      <label for="photoInput" class="photo-upload-btn" style="display:inline-flex;">
-        <span class="material-symbols-outlined" style="font-size:16px;">add_a_photo</span>
-        Ajouter une photo
-      </label>
-      <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="previewPhoto(event)"/>
-      <p style="font-size:11px;color:#906f6d;margin-top:6px;">Optionnel — Max 5 Mo</p>
-    </div>
-
-    <form onsubmit="return false;">
-
-      <!-- Nom complet -->
-      <div class="input-wrap">
-        <span class="material-symbols-outlined">badge</span>
-        <input id="nom" type="text" class="field-input" placeholder="Nom complet" style="height:48px;font-size:14px;"/>
-      </div>
-
-      <!-- Nom d'utilisateur -->
-      <div class="input-wrap" style="margin-bottom:4px;">
-        <span class="material-symbols-outlined">alternate_email</span>
-        <input id="username" type="text" class="field-input" placeholder="Nom d'utilisateur (unique)" maxlength="20" style="height:48px;font-size:14px;" oninput="verifierUsername(this.value)"/>
-      </div>
-      <p id="usernameStatus" style="font-size:11px;margin-bottom:12px;padding-left:4px;"></p>
-
-      <!-- Email -->
-      <div class="input-wrap">
-        <span class="material-symbols-outlined">mail</span>
-        <input id="email" type="email" class="field-input" placeholder="Adresse email" style="height:48px;font-size:14px;"/>
-      </div>
-
-      <!-- Téléphone -->
-      <div class="input-wrap" style="margin-bottom:4px;position:relative;">
-        <span class="material-symbols-outlined">phone</span>
-        <div style="display:flex;align-items:center;position:relative;">
-          <span style="position:absolute;left:48px;color:#906f6d;font-size:14px;font-weight:500;pointer-events:none;">+243</span>
-          <input id="telephone" type="tel" class="field-input" placeholder="8XX XXX XXXX" maxlength="11" style="height:48px;font-size:14px;padding-left:108px;" oninput="verifierTelephone(this.value)"/>
+      <!-- Logo -->
+      <div class="floating-logo">
+        <div class="logo-pulse" style="width:100%;height:100%;border:3px solid #840015;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined" style="color:#840015;font-size:46px;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 48;">emergency</span>
         </div>
       </div>
-      <p id="telStatus" style="font-size:11px;margin-bottom:12px;padding-left:4px;"></p>
 
-      <!-- Quartier -->
-      <div class="input-wrap" style="margin-bottom:12px;">
-        <span class="material-symbols-outlined">location_on</span>
-        <select id="quartier" class="field-input" style="height:48px;font-size:14px;appearance:none;padding-right:36px;">
-          <option value="">Votre quartier...</option>
-        </select>
-        <span class="material-symbols-outlined field-arrow" style="font-size:18px;">expand_more</span>
+      <div style="text-align:center;margin-bottom:20px;">
+        <h1 style="font-size:22px;font-weight:800;color:#840015;margin-bottom:4px;">Créer un compte</h1>
+        <p style="font-size:13px;color:#5b403e;">Rejoignez la communauté AlertBukavu</p>
       </div>
 
-      <!-- Mot de passe -->
-      <div class="input-wrap" style="margin-bottom:6px;">
-        <span class="material-symbols-outlined">vpn_key</span>
-        <input id="password" type="password" class="field-input" placeholder="Mot de passe (min. 8 car.)" style="height:48px;font-size:14px;padding-right:44px;"/>
-        <button type="button" onclick="togglePwd()" style="position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#906f6d;">
-          <span class="material-symbols-outlined" id="eyeIcon" style="font-size:18px;">visibility</span>
+      <!-- Photo de profil -->
+      <div style="text-align:center;margin-bottom:18px;">
+        <div style="position:relative;display:inline-block;">
+          <img id="photoPreview" src="" style="display:none;width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #e4bdbb;" alt=""/>
+          <div id="avatarDefault" style="width:80px;height:80px;border-radius:50%;background:#f0eded;border:3px solid #e4bdbb;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+            <span class="material-symbols-outlined" style="font-size:36px;color:#906f6d;">person</span>
+          </div>
+          <label for="photoInput" style="position:absolute;bottom:0;right:0;width:26px;height:26px;background:#840015;border:2px solid white;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+            <span class="material-symbols-outlined" style="font-size:13px;color:white;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">add_a_photo</span>
+          </label>
+          <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="previewPhoto(event)"/>
+        </div>
+        <p style="font-size:11px;color:#906f6d;margin-top:6px;">Photo de profil (optionnel)</p>
+      </div>
+
+      <form onsubmit="return false;">
+
+        <!-- Nom -->
+        <div class="input-wrap">
+          <input id="nom" type="text" class="field-input" placeholder="Nom complet"/>
+          <span class="material-symbols-outlined ico">badge</span>
+        </div>
+
+        <!-- Username -->
+        <div class="input-wrap" style="margin-bottom:4px;">
+          <input id="username" type="text" class="field-input" placeholder="Nom d'utilisateur" maxlength="20" oninput="verifierUsername(this.value)" autocomplete="username"/>
+          <span class="material-symbols-outlined ico">alternate_email</span>
+        </div>
+        <p id="usernameStatus" style="font-size:11px;margin-bottom:12px;padding-left:4px;min-height:16px;"></p>
+
+        <!-- Email -->
+        <div class="input-wrap">
+          <input id="email" type="email" class="field-input" placeholder="Adresse email" autocomplete="email"/>
+          <span class="material-symbols-outlined ico">mail</span>
+        </div>
+
+        <!-- Téléphone RDC -->
+        <div class="tel-wrap">
+          <div class="tel-prefix">+243</div>
+          <input id="telephone" type="tel" class="tel-input"
+            placeholder="8X XXX XXXX" maxlength="9"
+            oninput="formatTelephone(this)" inputmode="numeric"/>
+        </div>
+        <p id="telStatus" style="font-size:11px;margin-bottom:12px;padding-left:4px;min-height:16px;"></p>
+
+        <!-- Quartier -->
+        <div class="input-wrap" style="margin-bottom:12px;">
+          <select id="quartier" class="field-input" style="appearance:none;padding-right:36px;cursor:pointer;">
+            <option value="">Votre quartier...</option>
+          </select>
+          <span class="material-symbols-outlined ico">location_on</span>
+          <span class="material-symbols-outlined" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:18px;color:#906f6d;pointer-events:none;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">expand_more</span>
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="input-wrap" style="margin-bottom:4px;">
+          <input id="password" type="password" class="field-input" placeholder="Mot de passe (min. 8 car.)" style="padding-right:48px;" oninput="updateStrength(this.value)" autocomplete="new-password"/>
+          <span class="material-symbols-outlined ico">vpn_key</span>
+          <button type="button" onclick="togglePwd()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#906f6d;">
+            <span class="material-symbols-outlined" id="eyeIcon" style="font-size:18px;">visibility</span>
+          </button>
+        </div>
+
+        <!-- Barre force -->
+        <div style="height:4px;border-radius:2px;background:#f0eded;margin-bottom:16px;overflow:hidden;">
+          <div id="pwdFill" style="height:100%;width:0%;border-radius:2px;transition:all .3s;"></div>
+        </div>
+
+        <button type="button" id="btnReg" class="btn-primary" onclick="register()" style="height:52px;font-size:15px;border-radius:10px;">
+          CRÉER MON COMPTE
+          <span class="material-symbols-outlined" style="font-size:18px;color:white;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">arrow_forward</span>
         </button>
+
+      </form>
+
+      <div style="margin-top:16px;text-align:center;">
+        <a href="login.html" style="font-size:13px;font-weight:600;color:#840015;text-decoration:underline;text-underline-offset:3px;">
+          Déjà un compte ? Se connecter
+        </a>
       </div>
 
-      <!-- Barre force mot de passe -->
-      <div id="pwdStrengthBar" style="height:4px;border-radius:2px;background:#f0eded;margin-bottom:14px;overflow:hidden;">
-        <div id="pwdStrengthFill" style="height:100%;width:0%;border-radius:2px;transition:all .3s;"></div>
-      </div>
+    </div><!-- /card -->
 
-      <button type="button" id="btnRegister" class="btn-primary" onclick="register()" style="font-size:15px;height:50px;">
-        CRÉER MON COMPTE
-        <span class="material-symbols-outlined" style="font-size:18px;color:white;">arrow_forward</span>
-      </button>
-    </form>
+    <p style="color:rgba(255,255,255,.7);font-size:11px;text-shadow:0 1px 3px rgba(0,0,0,.5);margin-bottom:20px;">
+      AlertBukavu • Réseau communautaire • Bukavu, RDC
+    </p>
 
-    <div style="margin-top:16px;text-align:center;">
-      <a href="login.html" style="font-size:13px;font-weight:600;color:#840015;text-decoration:underline;text-underline-offset:3px;">Déjà un compte ? Se connecter</a>
-    </div>
   </div>
-
-  <div style="margin-top:16px;text-align:center;color:rgba(255,255,255,.7);font-size:11px;text-shadow:0 1px 3px rgba(0,0,0,.5);">
-    AlertBukavu • Réseau communautaire • Bukavu, RDC
-  </div>
-</main>
+</div>
 
 <script src="firebase-config.js"></script>
 <script>
-redirectIfAuth();
+  auth.onAuthStateChanged(user => { if (user) window.location.href = 'index.html'; });
 
-// Remplir quartiers
-const sel = document.getElementById('quartier');
-QUARTIERS.forEach(q => { const o = document.createElement('option'); o.value = q; o.textContent = q; sel.appendChild(o); });
+  // Quartiers
+  const sel = document.getElementById('quartier');
+  QUARTIERS.forEach(q => { const o = document.createElement('option'); o.value=q; o.textContent=q; sel.appendChild(o); });
 
-// Preview photo
-function previewPhoto(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  if (file.size > 5 * 1024 * 1024) { showToast('Image trop lourde (max 5 Mo)', 'error'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    const preview = document.getElementById('photoPreview');
-    preview.src = e.target.result;
-    preview.style.display = 'block';
-    document.getElementById('avatarDefault').style.display = 'none';
-  };
-  reader.readAsDataURL(file);
-}
-
-// Toggle password
-function togglePwd() {
-  const input = document.getElementById('password');
-  const icon = document.getElementById('eyeIcon');
-  input.type = input.type === 'password' ? 'text' : 'password';
-  icon.textContent = input.type === 'password' ? 'visibility' : 'visibility_off';
-}
-
-// Force mot de passe
-document.getElementById('password').addEventListener('input', function() {
-  const pwd = this.value;
-  let score = 0;
-  if (pwd.length >= 8) score++;
-  if (/[A-Z]/.test(pwd)) score++;
-  if (/[0-9]/.test(pwd)) score++;
-  if (/[^A-Za-z0-9]/.test(pwd)) score++;
-  const colors = ['#FF3D71','#FF9F43','#FFD43B','#00C48C'];
-  const widths = ['25%','50%','75%','100%'];
-  const fill = document.getElementById('pwdStrengthFill');
-  fill.style.width = score > 0 ? widths[score-1] : '0%';
-  fill.style.background = score > 0 ? colors[score-1] : '';
-});
-
-// Vérification username
-let usernameTimer;
-async function verifierUsername(val) {
-  const status = document.getElementById('usernameStatus');
-  clearTimeout(usernameTimer);
-  if (!val) { status.textContent = ''; return; }
-  if (!validerUsername(val)) {
-    status.textContent = '3-20 caractères, lettres, chiffres ou _';
-    status.style.color = '#FF3D71';
-    return;
-  }
-  status.textContent = 'Vérification...';
-  status.style.color = '#906f6d';
-  usernameTimer = setTimeout(async () => {
-    const dispo = await usernameDisponible(val);
-    if (dispo) {
-      status.textContent = '@' + val + ' est disponible';
-      status.style.color = '#00C48C';
-    } else {
-      status.textContent = '@' + val + ' est déjà utilisé';
-      status.style.color = '#FF3D71';
-    }
-  }, 600);
-}
-
-// Vérification téléphone
-function verifierTelephone(val) {
-  const status = document.getElementById('telStatus');
-  const input = document.getElementById('telephone');
-  if (!val) { status.textContent = ''; input.style.borderColor = ''; return; }
-  // Vérifier qu'il y a au moins 7 chiffres
-  const fullPhone = '+243' + val;
-  if (/\d{7,}/.test(val)) {
-    status.textContent = '✓ Numéro accepté';
-    status.style.color = '#00C48C';
-    input.style.borderColor = '#00C48C';
-  } else {
-    status.textContent = '✗ Au moins 7 chiffres requis';
-    status.style.color = '#FF3D71';
-    input.style.borderColor = '#FF3D71';
-  }
-}
-
-async function register() {
-  const nom = document.getElementById('nom').value.trim();
-  const username = document.getElementById('username').value.trim().toLowerCase();
-  const email = document.getElementById('email').value.trim();
-  const telephone = '+243' + document.getElementById('telephone').value.trim();
-  const quartier = document.getElementById('quartier').value;
-  const password = document.getElementById('password').value;
-  const photoFile = document.getElementById('photoInput').files[0];
-  const btn = document.getElementById('btnRegister');
-  const btnHTML = btn.innerHTML;
-
-  // Validations
-  if (!nom) { showToast('Le nom complet est requis', 'error'); return; }
-  if (!validerUsername(username)) { showToast('Nom d\'utilisateur invalide (3-20 car., lettres/chiffres/_)', 'error'); return; }
-  if (!email) { showToast('L\'email est requis', 'error'); return; }
-  if (!validerTelephoneRDC(telephone)) { showToast('Numéro de téléphone invalide (format: 8XX XXX XXXX)', 'error'); return; }
-  if (!quartier) { showToast('Choisissez votre quartier', 'error'); return; }
-  if (password.length < 8) { showToast('Mot de passe trop court (min. 8 caractères)', 'error'); return; }
-
-  // Vérifier username disponible
-  const dispo = await usernameDisponible(username);
-  if (!dispo) { showToast('Ce nom d\'utilisateur est déjà pris', 'error'); return; }
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>&nbsp;Création du compte...';
-  const timeout = setTimeout(() => {
-    btn.disabled = false;
-    btn.innerHTML = btnHTML;
-    showToast('Délai d\'attente dépassé. Réessayez.', 'error');
-  }, 20000);
-
-  try {
-    // Créer le compte Firebase Auth
-    const result = await auth.createUserWithEmailAndPassword(email, password);
-    const uid = result.user.uid;
-
-    // Upload photo si fournie
-    let photoUrl = null;
-    if (photoFile) {
-      try {
-        btn.innerHTML = '<span class="spinner"></span>&nbsp;Upload photo...';
-        photoUrl = await uploadImage(photoFile, 'profils');
-      } catch(e) {
-        console.warn('Upload photo échoué, on continue sans photo', e);
-      }
-    }
-
-    // Sauvegarder profil
-    await db.collection('users').doc(uid).set({
-      nom, username,
-      email, telephone: normaliserTelephone(telephone),
-      quartier, photoUrl: photoUrl || null,
-      estBloque: false,
-      nbAlertes: 0, nbConfirmations: 0, nbFaussesAlertes: 0,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // Index username pour la recherche à la connexion
-    await db.collection('usernames').doc(username).set({ uid, email });
-
-    clearTimeout(timeout);
-    await Swal.fire({
-      icon: 'success',
-      title: 'Compte créé !',
-      text: `Bienvenue sur AlertBukavu, @${username} !`,
-      confirmButtonColor: '#840015',
-      confirmButtonText: 'Commencer',
-      allowOutsideClick: false
-    });
-
-    window.location.href = 'index.html';
-
-  } catch(e) {
-    clearTimeout(timeout);
-    btn.disabled = false;
-    btn.innerHTML = btnHTML;
-    const msgs = {
-      'auth/email-already-in-use': 'Cet email est déjà utilisé.',
-      'auth/invalid-email': 'Adresse email invalide.',
-      'auth/weak-password': 'Mot de passe trop faible.',
-      'auth/operation-not-allowed': 'Création de compte temporairement indisponible.'
+  // Preview photo
+  function previewPhoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5*1024*1024) { showToast('Image trop lourde (max 5 Mo)','error'); return; }
+    const r = new FileReader();
+    r.onload = ev => {
+      const p = document.getElementById('photoPreview');
+      p.src = ev.target.result; p.style.display='block';
+      document.getElementById('avatarDefault').style.display='none';
     };
-    showToast(msgs[e.code] || 'Erreur: ' + (e.message || e.code), 'error');
+    r.readAsDataURL(file);
   }
-}
+
+  // Toggle password
+  function togglePwd() {
+    const i = document.getElementById('password');
+    const ic = document.getElementById('eyeIcon');
+    i.type = i.type==='password'?'text':'password';
+    ic.textContent = i.type==='password'?'visibility':'visibility_off';
+  }
+
+  // Force mot de passe
+  function updateStrength(pwd) {
+    let s=0;
+    if(pwd.length>=8) s++;
+    if(/[A-Z]/.test(pwd)) s++;
+    if(/[0-9]/.test(pwd)) s++;
+    if(/[^A-Za-z0-9]/.test(pwd)) s++;
+    const cols=['#FF3D71','#FF9F43','#FFD43B','#00C48C'];
+    const w=['25%','50%','75%','100%'];
+    const f=document.getElementById('pwdFill');
+    f.style.width=s>0?w[s-1]:'0%';
+    f.style.background=s>0?cols[s-1]:'';
+  }
+
+  // Formatage téléphone — chiffres seulement, max 9
+  function formatTelephone(input) {
+    // Garder seulement les chiffres
+    let val = input.value.replace(/\D/g,'');
+    // Format: XX XXX XXXX
+    if (val.length > 2 && val.length <= 5) val = val.slice(0,2)+' '+val.slice(2);
+    else if (val.length > 5) val = val.slice(0,2)+' '+val.slice(2,5)+' '+val.slice(5,9);
+    input.value = val;
+
+    const status = document.getElementById('telStatus');
+    const digits = val.replace(/\D/g,'');
+    if (digits.length === 0) { status.textContent=''; return; }
+    if (digits.length < 9) {
+      status.textContent='Numéro incomplet';
+      status.style.color='#FF9F43';
+    } else if (validerTelephoneRDC('+243'+digits)) {
+      status.textContent='Numéro RDC valide';
+      status.style.color='#00C48C';
+    } else {
+      status.textContent='Numéro invalide (ex: 81 234 5678)';
+      status.style.color='#FF3D71';
+    }
+  }
+
+  // Vérification username
+  let usernameTimer;
+  async function verifierUsername(val) {
+    const status = document.getElementById('usernameStatus');
+    clearTimeout(usernameTimer);
+    if (!val) { status.textContent=''; return; }
+    if (!validerUsername(val)) {
+      status.textContent='3-20 caractères, lettres/chiffres/_';
+      status.style.color='#FF3D71'; return;
+    }
+    status.textContent='Vérification...'; status.style.color='#906f6d';
+    usernameTimer = setTimeout(async()=>{
+      const dispo = await usernameDisponible(val);
+      status.textContent = dispo ? '@'+val+' est disponible' : '@'+val+' est déjà pris';
+      status.style.color = dispo ? '#00C48C' : '#FF3D71';
+    }, 600);
+  }
+
+  async function register() {
+    const nom       = document.getElementById('nom').value.trim();
+    const username  = document.getElementById('username').value.trim().toLowerCase();
+    const email     = document.getElementById('email').value.trim();
+    const telRaw    = document.getElementById('telephone').value.replace(/\D/g,'');
+    const telephone = '+243' + telRaw;
+    const quartier  = document.getElementById('quartier').value;
+    const password  = document.getElementById('password').value;
+    const photoFile = document.getElementById('photoInput').files[0];
+    const btn       = document.getElementById('btnReg');
+
+    // Validations
+    if (!nom)                              { showToast('Le nom est requis','error'); return; }
+    if (!validerUsername(username))        { showToast('Nom d\'utilisateur invalide (3-20 car., lettres/chiffres/_)','error'); return; }
+    if (!email)                            { showToast('L\'email est requis','error'); return; }
+    if (!validerTelephoneRDC(telephone))   { showToast('Numéro de téléphone RDC invalide','error'); return; }
+    if (!quartier)                         { showToast('Choisissez votre quartier','error'); return; }
+    if (password.length < 8)              { showToast('Mot de passe trop court (min. 8 car.)','error'); return; }
+
+    const dispo = await usernameDisponible(username);
+    if (!dispo) { showToast('Ce nom d\'utilisateur est déjà pris','error'); return; }
+
+    btn.disabled=true;
+    btn.innerHTML='<span class="spinner"></span>&nbsp;Création...';
+
+    try {
+      const result = await auth.createUserWithEmailAndPassword(email, password);
+      const uid = result.user.uid;
+
+      let photoUrl = null;
+      if (photoFile) {
+        try {
+          btn.innerHTML='<span class="spinner"></span>&nbsp;Upload photo...';
+          photoUrl = await uploadImage(photoFile,'profils');
+        } catch(e) { console.warn('Upload photo échoué'); }
+      }
+
+      await db.collection('users').doc(uid).set({
+        nom, username, email,
+        telephone, quartier, photoUrl,
+        estBloque:false,
+        nbAlertes:0, nbConfirmations:0, nbFaussesAlertes:0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      await db.collection('usernames').doc(username).set({ uid, email });
+
+      await Swal.fire({
+        icon:'success',
+        title:'Compte créé !',
+        text:`Bienvenue sur AlertBukavu, @${username} !`,
+        confirmButtonColor:'#840015',
+        confirmButtonText:'Commencer'
+      });
+
+      window.location.href='index.html';
+
+    } catch(e) {
+      btn.disabled=false;
+      btn.innerHTML='CRÉER MON COMPTE <span class="material-symbols-outlined" style="font-size:18px;color:white;font-variation-settings:\'FILL\' 1,\'wght\' 400,\'GRAD\' 0,\'opsz\' 48;">arrow_forward</span>';
+      const msgs = {
+        'auth/email-already-in-use':'Cet email est déjà utilisé.',
+        'auth/invalid-email':'Adresse email invalide.',
+        'auth/weak-password':'Mot de passe trop faible.'
+      };
+      showToast(msgs[e.code]||'Erreur : '+e.message,'error');
+    }
+  }
 </script>
 </body>
 </html>

@@ -55,10 +55,11 @@ const URGENCES = {
 
 // ==== VALIDATION ====
 function validerTelephoneRDC(tel) {
-    // Accepter les numéros RDC sans validation stricte
+    // Nettoyer le numéro
     const clean = tel.replace(/[\s\-\(\)]/g, '');
-    // Vérifier qu'il y a au moins quelques chiffres
-    return /\d{7,}/.test(clean);
+    // Formats valides RDC: +243XXXXXXXXX ou 0XXXXXXXXX ou 243XXXXXXXXX
+    const regex = /^(\+243|243|0)(8[1-9]|9[0-9])\d{7}$/;
+    return regex.test(clean);
 }
 
 function normaliserTelephone(tel) {

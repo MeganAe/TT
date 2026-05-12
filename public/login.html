@@ -14,84 +14,202 @@
 <link rel="stylesheet" href="style.css"/>
 <style>
   .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
-  body { min-height:100dvh;display:flex;align-items:center;justify-content:center;position:relative;overflow-y:auto;background:#1c1b1b;flex-direction:column;padding:40px 0; }
-  .input-wrap { position:relative;margin-bottom:14px; }
-  .input-wrap .ico { position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:18px;color:#906f6d;pointer-events:none; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .bg-wrap {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .bg-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: brightness(.82) saturate(.55);
+    /* Légère animation de zoom lent */
+    animation: bgZoom 20s ease-in-out infinite alternate;
+    transform-origin: center;
+  }
+  @keyframes bgZoom {
+    from { transform: scale(1); }
+    to   { transform: scale(1.06); }
+  }
+
+  .bg-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom,
+      rgba(0,0,0,.15) 0%,
+      rgba(0,0,0,.05) 40%,
+      rgba(0,0,0,.45) 100%);
+  }
+
+  /* Scroll uniquement sur le contenu */
+  .scroll-area {
+    position: relative;
+    z-index: 10;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  .card-login {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 30px 70px rgba(0,0,0,.35);
+    padding: 52px 32px 32px;
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    /* Entrée douce */
+    animation: cardIn .5s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes cardIn {
+    from { opacity:0; transform:translateY(32px) scale(.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  .floating-logo {
+    position: absolute;
+    top: -52px; left: 50%;
+    transform: translateX(-50%);
+    width: 104px; height: 104px;
+    background: white;
+    border-radius: 50%;
+    padding: 9px;
+    box-shadow: 0 6px 28px rgba(132,0,21,.28);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .input-wrap { position: relative; margin-bottom: 14px; }
+  .input-wrap .ico {
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px; color: #906f6d; pointer-events: none;
+    transition: color .2s;
+  }
+  .field-input {
+    width: 100%; height: 52px;
+    padding: 0 16px 0 48px;
+    background: #f6f3f2;
+    border: 1.5px solid #e4bdbb;
+    border-radius: 10px;
+    font-size: 15px; font-family: 'Inter', sans-serif;
+    color: #1c1b1b; outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    box-sizing: border-box;
+  }
+  .field-input:focus {
+    border-color: #840015;
+    box-shadow: 0 0 0 3px rgba(132,0,21,.1);
+    background: white;
+  }
+  .field-input:focus + .ico,
+  .input-wrap:focus-within .ico { color: #840015; }
+  .field-input::placeholder { color: rgba(91,64,62,.45); }
 </style>
 </head>
 <body>
 
-<!-- Background Bukavu -->
-<div style="position:absolute;inset:0;z-index:0;">
-  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMcZwNH9PaJycSQXZPnZC-_HSOTENwx0QNNE7-4uorlL8q6YbeNsaaRuiDlYXrtpzBFiZ5E6J0rXyqZmzmcGw_WsgzFEogYb16b833tuTIMJZ_MnJG-QiQqOj74IXsOK0b5CyshKxyqeTxWCyw9CK07WSrQruhyFVg7g08QNa1_ZkyN8KS3ckEP-UyucX2a8DrVeicBPEpSR8JX3nTnJ1tQCY-VGpaMlLDOZ31Bf2qGV2KZjQZCZt46bDQGhnSQuWP5xd7rlY0SYTz"
-    alt="Bukavu" style="width:100%;height:100%;object-fit:cover;filter:brightness(.85) saturate(.6);"/>
-  <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.2),transparent,rgba(0,0,0,.5));"></div>
+<!-- Background fixe avec animation -->
+<div class="bg-wrap">
+  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMcZwNH9PaJycSQXZPnZC-_HSOTENwx0QNNE7-4uorlL8q6YbeNsaaRuiDlYXrtpzBFiZ5E6J0rXyqZmzmcGw_WsgzFEogYb16b833tuTIMJZ_MnJG-QiQqOj74IXsOK0b5CyshKxyqeTxWCyw9CK07WSrQruhyFVg7g08QNa1_ZkyN8KS3ckEP-UyucX2a8DrVeicBPEpSR8JX3nTnJ1tQCY-VGpaMlLDOZ31Bf2qGV2KZjQZCZt46bDQGhnSQuWP5xd7rlY0SYTz" alt="Bukavu"/>
+  <div class="bg-overlay"></div>
 </div>
 
-<main style="position:relative;z-index:10;width:100%;max-width:400px;padding:0 20px;">
-  <div style="background:white;border-radius:16px;box-shadow:0 25px 60px rgba(0,0,0,.35);padding:48px 32px 32px;position:relative;margin-top:56px;">
+<!-- Zone scrollable -->
+<div class="scroll-area">
+  <div style="width:100%;max-width:400px;display:flex;flex-direction:column;align-items:center;">
 
-    <!-- Logo flottant -->
-    <div style="position:absolute;top:-48px;left:50%;transform:translateX(-50%);width:96px;height:96px;background:white;border-radius:50%;padding:8px;box-shadow:0 4px 20px rgba(132,0,21,.25);display:flex;align-items:center;justify-content:center;">
-      <div class="logo-pulse" style="width:100%;height:100%;border:3px solid #840015;border-radius:50%;display:flex;align-items:center;justify-content:center;">
-        <span class="material-symbols-outlined" style="color:#840015;font-size:42px;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 48;">emergency</span>
-      </div>
-    </div>
+    <!-- Card -->
+    <div class="card-login">
 
-    <!-- Titre -->
-    <div style="text-align:center;margin-bottom:28px;">
-      <h1 style="font-size:28px;font-weight:800;color:#840015;letter-spacing:-.01em;margin-bottom:4px;">ALERT BUKAVU</h1>
-      <p style="font-size:13px;color:#5b403e;font-weight:500;">Informer. Protéger. Agir.</p>
-    </div>
-
-    <!-- Message compte bloqué -->
-    <div id="bloqueMsg" style="display:none;background:#ffdad8;border:1px solid #840015;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#410006;font-size:13px;font-weight:500;text-align:center;">
-      Votre compte a été suspendu pour fausse alerte.
-    </div>
-
-    <form onsubmit="return false;">
-
-      <!-- Username -->
-      <div class="input-wrap">
-        <span class="material-symbols-outlined ico">alternate_email</span>
-        <input id="username" type="text" class="field-input" placeholder="Nom d'utilisateur" style="height:52px;font-size:15px;" autocomplete="username"/>
+      <!-- Logo flottant -->
+      <div class="floating-logo">
+        <div class="logo-pulse" style="width:100%;height:100%;border:3px solid #840015;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined" style="color:#840015;font-size:46px;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 48;">emergency</span>
+        </div>
       </div>
 
-      <!-- Mot de passe -->
-      <div class="input-wrap" style="margin-bottom:8px;">
-        <span class="material-symbols-outlined ico">vpn_key</span>
-        <input id="password" type="password" class="field-input" placeholder="Mot de passe" style="height:52px;font-size:15px;padding-right:48px;" onkeydown="if(event.key==='Enter')login()" autocomplete="current-password"/>
-        <button type="button" onclick="togglePwd()" style="position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#906f6d;">
-          <span class="material-symbols-outlined" id="eyeIcon" style="font-size:18px;">visibility</span>
+      <!-- Titre -->
+      <div style="text-align:center;margin-bottom:28px;">
+        <h1 style="font-size:28px;font-weight:800;color:#840015;letter-spacing:-.02em;margin-bottom:4px;">ALERT BUKAVU</h1>
+        <p style="font-size:13px;color:#5b403e;font-weight:500;">Informer. Protéger. Agir.</p>
+      </div>
+
+      <!-- Message bloqué -->
+      <div id="bloqueMsg" style="display:none;background:#ffdad8;border:1px solid #840015;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#410006;font-size:13px;font-weight:600;text-align:center;">
+        Votre compte a été suspendu pour fausse alerte.
+      </div>
+
+      <form onsubmit="return false;">
+
+        <!-- Identifiant (username ou email) -->
+        <div class="input-wrap">
+          <input id="identifiant" type="text" class="field-input"
+            placeholder="Nom d'utilisateur ou email"
+            autocomplete="username" style="padding-left:48px;"/>
+          <span class="material-symbols-outlined ico">account_circle</span>
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="input-wrap" style="margin-bottom:6px;">
+          <input id="password" type="password" class="field-input"
+            placeholder="Mot de passe"
+            style="padding-left:48px;padding-right:48px;"
+            onkeydown="if(event.key==='Enter')login()"
+            autocomplete="current-password"/>
+          <span class="material-symbols-outlined ico">vpn_key</span>
+          <button type="button" onclick="togglePwd()"
+            style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#906f6d;display:flex;align-items:center;">
+            <span class="material-symbols-outlined" id="eyeIcon" style="font-size:18px;">visibility</span>
+          </button>
+        </div>
+
+        <button type="button" id="btnLogin" class="btn-primary" onclick="login()"
+          style="margin-top:20px;height:52px;font-size:16px;border-radius:10px;">
+          SE CONNECTER
+          <span class="material-symbols-outlined"
+            style="font-size:18px;color:white;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">arrow_forward</span>
         </button>
+
+      </form>
+
+      <div style="margin:20px 0;display:flex;align-items:center;gap:12px;">
+        <div style="flex:1;height:1px;background:#e4bdbb;"></div>
+        <span style="color:#906f6d;font-size:12px;">ou</span>
+        <div style="flex:1;height:1px;background:#e4bdbb;"></div>
       </div>
 
-      <button type="button" id="btnLogin" class="btn-primary" onclick="login()" style="margin-top:20px;height:52px;font-size:16px;">
-        SE CONNECTER
-        <span class="material-symbols-outlined" style="font-size:18px;color:white;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">arrow_forward</span>
-      </button>
-    </form>
+      <a href="register.html"
+        style="display:flex;align-items:center;justify-content:center;height:48px;background:#ffdad8;border-radius:10px;color:#840015;font-weight:700;font-size:14px;text-decoration:none;gap:6px;transition:background .2s;"
+        onmouseover="this.style.background='#ffb3af'"
+        onmouseout="this.style.background='#ffdad8'">
+        <span class="material-symbols-outlined"
+          style="font-size:18px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">person_add</span>
+        Créer un compte
+      </a>
 
-    <div style="margin:20px 0;display:flex;align-items:center;gap:12px;">
-      <div style="flex:1;height:1px;background:#e4bdbb;"></div>
-      <span style="color:#906f6d;font-size:12px;">ou</span>
-      <div style="flex:1;height:1px;background:#e4bdbb;"></div>
-    </div>
+    </div><!-- /card -->
 
-    <a href="register.html" style="display:flex;align-items:center;justify-content:center;height:48px;background:#ffdad8;border-radius:8px;color:#840015;font-weight:700;font-size:14px;text-decoration:none;gap:6px;transition:background .2s;" onmouseover="this.style.background='#ffb3af'" onmouseout="this.style.background='#ffdad8'">
-      <span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">person_add</span>
-      Créer un compte
-    </a>
+    <p style="margin-top:20px;color:rgba(255,255,255,.7);font-size:11px;text-shadow:0 1px 3px rgba(0,0,0,.5);">
+      AlertBukavu • Réseau communautaire • Bukavu, RDC
+    </p>
+
   </div>
-
-  <div style="margin-top:20px;text-align:center;color:rgba(255,255,255,.7);font-size:11px;text-shadow:0 1px 3px rgba(0,0,0,.5);">
-    AlertBukavu • Réseau communautaire • Bukavu, RDC
-  </div>
-</main>
+</div><!-- /scroll-area -->
 
 <script src="firebase-config.js"></script>
 <script>
-  // Afficher message si bloqué
   if (new URLSearchParams(window.location.search).get('bloque')) {
     document.getElementById('bloqueMsg').style.display = 'block';
     showBloqueAlert();
@@ -103,66 +221,64 @@
 
   function togglePwd() {
     const input = document.getElementById('password');
-    const icon = document.getElementById('eyeIcon');
-    input.type = input.type === 'password' ? 'text' : 'password';
+    const icon  = document.getElementById('eyeIcon');
+    input.type  = input.type === 'password' ? 'text' : 'password';
     icon.textContent = input.type === 'password' ? 'visibility' : 'visibility_off';
   }
 
   async function login() {
-    const username = document.getElementById('username').value.trim().toLowerCase();
-    const password = document.getElementById('password').value;
-    const btn = document.getElementById('btnLogin');
-    const btnHTML = btn.innerHTML;
+    const identifiant = document.getElementById('identifiant').value.trim();
+    const password    = document.getElementById('password').value;
+    const btn         = document.getElementById('btnLogin');
 
-    if (!username) { showToast('Entrez votre nom d\'utilisateur', 'error'); return; }
-    if (!password) { showToast('Entrez votre mot de passe', 'error'); return; }
+    if (!identifiant) { showToast('Entrez votre identifiant', 'error'); return; }
+    if (!password)     { showToast('Entrez votre mot de passe', 'error'); return; }
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>&nbsp;Connexion...';
-    const timeout = setTimeout(() => {
-      btn.disabled = false;
-      btn.innerHTML = btnHTML;
-      showToast('Délai d\'attente dépassé. Réessayez.', 'error');
-    }, 15000);
 
     try {
-      // Récupérer email depuis username
-      const usernameDoc = await db.collection('usernames').doc(username).get();
+      let email = identifiant;
 
-      if (!usernameDoc.exists) {
-        clearTimeout(timeout);
-        throw { code: 'username/not-found' };
+      // Si ce n'est pas un email → chercher par username
+      if (!identifiant.includes('@')) {
+        const usernameDoc = await db.collection('usernames')
+          .doc(identifiant.toLowerCase()).get();
+        if (!usernameDoc.exists) throw { code: 'username/not-found' };
+        email = usernameDoc.data().email;
       }
 
-      const email = usernameDoc.data().email;
       const result = await auth.signInWithEmailAndPassword(email, password);
 
-      // Vérifier si compte bloqué
+      // Vérifier si bloqué
       const userDoc = await db.collection('users').doc(result.user.uid).get();
       if (userDoc.exists && userDoc.data().estBloque) {
-        clearTimeout(timeout);
         await auth.signOut();
-        btn.disabled = false;
-        btn.innerHTML = btnHTML;
         await showBloqueAlert();
+        resetBtn();
         return;
       }
 
-      clearTimeout(timeout);
       window.location.href = 'index.html';
 
     } catch(e) {
-      clearTimeout(timeout);
-      btn.disabled = false;
-      btn.innerHTML = btnHTML;
+      resetBtn();
       const msgs = {
-        'username/not-found': 'Nom d\'utilisateur introuvable.',
-        'auth/wrong-password': 'Mot de passe incorrect.',
-        'auth/invalid-credential': 'Identifiants incorrects.',
-        'auth/too-many-requests': 'Trop de tentatives. Réessayez plus tard.'
+        'username/not-found':       'Nom d\'utilisateur introuvable.',
+        'auth/wrong-password':      'Mot de passe incorrect.',
+        'auth/invalid-credential':  'Identifiants incorrects.',
+        'auth/user-not-found':      'Aucun compte avec cet email.',
+        'auth/too-many-requests':   'Trop de tentatives. Réessayez plus tard.',
+        'auth/invalid-email':       'Format d\'email invalide.'
       };
-      showToast(msgs[e.code] || 'Erreur de connexion: ' + (e.message || e.code), 'error');
+      showToast(msgs[e.code] || 'Erreur de connexion', 'error');
     }
+  }
+
+  function resetBtn() {
+    const btn = document.getElementById('btnLogin');
+    btn.disabled = false;
+    btn.innerHTML = 'SE CONNECTER <span class="material-symbols-outlined" style="font-size:18px;color:white;font-variation-settings:\'FILL\' 1,\'wght\' 400,\'GRAD\' 0,\'opsz\' 48;">arrow_forward</span>';
   }
 </script>
 </body>
