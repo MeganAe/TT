@@ -497,6 +497,17 @@
 
           await db.collection("alertes").add(alerteData);
 
+          const notificationData = {
+            titre,
+            description,
+            categorie: categorieChoisie,
+            quartier,
+            niveauUrgence: urgenceChoisie,
+            userNom: nomUser,
+            userUsername: usernameUser,
+            createdAt: new Date().toISOString(),
+          };
+
           currentUser
             .getIdToken()
             .then((token) =>
@@ -506,12 +517,15 @@
                   "Content-Type": "application/json",
                   Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                  ...alerteData,
-                  createdAt: new Date().toISOString(),
-                }),
+                body: JSON.stringify(notificationData),
               }),
             )
+            .then(async (response) => {
+              if (!response.ok) {
+                const details = await response.text().catch(() => "");
+                console.warn("Notification email refusee:", response.status, details);
+              }
+            })
             .catch((error) => {
               console.warn("Notification email non envoyee:", error);
             });
