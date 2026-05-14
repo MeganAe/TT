@@ -409,8 +409,10 @@
 
       function afficherPhotoProfil(data) {
         const img = document.getElementById("photoUser");
+        img.onerror = null;
         img.src = getPhotoUrl(data, 104);
         img.onerror = () => {
+          img.onerror = null;
           img.src = genererAvatar(data?.nom || data?.username || "U", 104);
         };
       }
@@ -512,19 +514,29 @@
         });
 
         try {
+          const previewUrl = URL.createObjectURL(file);
+          document.getElementById("photoUser").src = previewUrl;
+
           let photoUrl;
           try {
             photoUrl = await uploadImage(file, "profils");
-          } catch (e) {
-            photoUrl = await imageFileToDataUrl(file);
+          } catch (firstError) {
+            console.warn("Upload profil Cloudinary echoue:", firstError);
+            try {
+              photoUrl = await uploadImage(file, "alertes");
+            } catch (secondError) {
+              console.warn("Upload profil dossier de secours echoue:", secondError);
+              photoUrl = await imageFileToDataUrl(file);
+            }
           }
 
           await db
             .collection("users")
             .doc(currentUser.uid)
-            .update({ photoUrl });
+            .set({ photoUrl }, { merge: true });
           currentUserData = { ...(currentUserData || {}), photoUrl };
           afficherPhotoProfil(currentUserData);
+          URL.revokeObjectURL(previewUrl);
           Swal.close();
           showToast("Photo de profil mise a jour");
         } catch (e) {

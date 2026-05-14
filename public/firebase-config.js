@@ -55,8 +55,10 @@ async function uploadImage(file, folder = 'alertbukavu') {
         `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
         { method: 'POST', body: formData }
     );
-    if (!response.ok) throw new Error('Erreur upload image');
     const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data?.error?.message || 'Erreur upload image');
+    }
     return data.secure_url;
 }
 

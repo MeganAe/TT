@@ -52,6 +52,38 @@ function escapeHtml(value = '') {
     .replace(/'/g, '&#039;');
 }
 
+function parseEmailList(value = '') {
+  return String(value)
+    .split(/[,\n;]/)
+    .map(email => email.trim())
+    .filter(email => email && email.includes('@'));
+}
+
+function uniqueEmails(emails) {
+  return [...new Set(emails.map(email => email.toLowerCase()))];
+}
+
+function getAuthorityEmails(alert) {
+  const categoryEnvByName = {
+    securite: 'AUTHORITY_EMAILS_SECURITE',
+    eau: 'AUTHORITY_EMAILS_EAU',
+    routes: 'AUTHORITY_EMAILS_ROUTES',
+    sante: 'AUTHORITY_EMAILS_SANTE',
+    meteo: 'AUTHORITY_EMAILS_METEO',
+    autre: 'AUTHORITY_EMAILS_AUTRE'
+  };
+
+  const generalEmails = parseEmailList(process.env.AUTHORITY_EMAILS);
+  const categoryKey = String(alert.categorie || '').toLowerCase();
+  const categoryEnv = categoryEnvByName[categoryKey];
+  const categoryEmails = categoryEnv ? parseEmailList(process.env[categoryEnv]) : [];
+  const criticalEmails = alert.niveauUrgence === 'critique'
+    ? parseEmailList(process.env.AUTHORITY_EMAILS_CRITIQUE)
+    : [];
+
+  return uniqueEmails([...generalEmails, ...categoryEmails, ...criticalEmails]);
+}
+
 function buildAlertEmail(alert) {
   const title = escapeHtml(alert.titre);
   const quartier = escapeHtml(alert.quartier);
@@ -72,7 +104,7 @@ function buildAlertEmail(alert) {
       </p>
       <p>${description}</p>
       <p style="font-size:12px;color:#5b403e">
-        Message automatique envoye aux habitants inscrits dans le quartier concerne.
+        Message automatique envoye aux habitants inscrits dans le quartier concerne et aux autorites configurees.
       </p>
     </div>
   `;
@@ -105,21 +137,32 @@ app.post('/api/notify-alert', async (req, res) => {
     const emails = [...new Set(snapshot.docs
       .map(doc => doc.data().email)
       .filter(Boolean))];
+    const authorityEmails = getAuthorityEmails(alert);
+    const recipientEmails = uniqueEmails([...emails, ...authorityEmails]);
 
-    if (!emails.length) {
-      return res.json({ sent: 0, message: 'Aucun email trouve pour ce quartier' });
+    if (!recipientEmails.length) {
+      return res.json({
+        sent: 0,
+        sentUsers: 0,
+        sentAuthorities: 0,
+        message: 'Aucun email trouve pour ce quartier et aucune autorite configuree'
+      });
     }
 
     const transporter = getMailTransporter();
 
     await transporter.sendMail({
       from: process.env.MAIL_FROM,
-      bcc: emails,
-      subject: `[AlertBukavu] ${alert.titre}`,
+      bcc: recipientEmails,
+      subject: `[AlertBukavu][${alert.quartier}] ${alert.titre}`,
       html: buildAlertEmail(alert)
     });
 
-    res.json({ sent: emails.length });
+    res.json({
+      sent: recipientEmails.length,
+      sentUsers: emails.length,
+      sentAuthorities: authorityEmails.length
+    });
   } catch (error) {
     console.error('Erreur notification email:', error);
     res.status(500).json({ error: 'Impossible d envoyer les emails' });
