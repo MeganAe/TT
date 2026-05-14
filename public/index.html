@@ -296,6 +296,8 @@
       let filtreActuel = "tous";
       let currentUser = null;
       let currentUserData = null;
+      const CONFIRMATIONS_POUR_VALIDER = 5;
+      const SIGNALEMENTS_POUR_SUSPENDRE = 5;
 
       requireAuth().then(async (user) => {
         currentUser = user;
@@ -454,7 +456,7 @@
         await batch.commit();
         const doc = await db.collection("alertes").doc(alerteId).get();
         if (
-          (doc.data().nbConfirmations || 0) >= 3 &&
+          (doc.data().nbConfirmations || 0) >= CONFIRMATIONS_POUR_VALIDER &&
           doc.data().statut === "en_attente"
         ) {
           await db
@@ -478,6 +480,17 @@
           return;
         }
 
+        const alerteRef = db.collection("alertes").doc(alerteId);
+        const beforeDoc = await alerteRef.get();
+        const beforeData = beforeDoc.data() || {};
+        if (beforeData.statut === "confirmee" || beforeData.statut === "resolue") {
+          showToast(
+            "Cette alerte est deja validee. Seul un administrateur peut la suspendre.",
+            "info",
+          );
+          return;
+        }
+
         const result = await Swal.fire({
           title: "Signaler cette alerte ?",
           html: "Vous pensez que cette alerte est <strong>fausse ou trompeuse</strong> ?<br><small style=\"color:#906f6d;\">Après 5 signalements, l'alerte sera suspendue et l'auteur sanctionné.</small>",
@@ -491,14 +504,17 @@
 
         if (!result.isConfirmed) return;
 
-        const alerteRef = db.collection("alertes").doc(alerteId);
         await alerteRef.update({
           nbSignalements: firebase.firestore.FieldValue.increment(1),
         });
         const doc = await alerteRef.get();
         const data = doc.data();
 
-        if ((data.nbSignalements || 0) >= 5) {
+        if (
+          (data.nbSignalements || 0) >= SIGNALEMENTS_POUR_SUSPENDRE &&
+          data.statut !== "confirmee" &&
+          data.statut !== "resolue"
+        ) {
           await alerteRef.update({ statut: "suspendue" });
 
           if (auteurId) {
