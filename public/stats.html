@@ -3,375 +3,125 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Statistiques des alertes communautaires à Bukavu — catégories, urgences et quartiers les plus actifs." />
     <title>AlertBukavu — Statistiques</title>
+    <link rel="icon" type="image/png" href="logo.png" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="style.css" />
     <style>
-      .material-symbols-outlined {
-        font-variation-settings:
-          "FILL" 1,
-          "wght" 400,
-          "GRAD" 0,
-          "opsz" 48;
-      }
-      body {
-        padding-bottom: 80px;
-        background: #fcf9f8;
-      }
-      .stat-card {
-        background: white;
-        border-radius: 12px;
-        border: 1px solid #e4bdbb;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 1px 4px rgba(132, 0, 21, 0.05);
-      }
+      .material-symbols-outlined{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48}
+      body{padding-bottom:80px}
     </style>
   </head>
   <body>
     <header class="top-bar">
-      <div style="display: flex; align-items: center; gap: 10px">
-        <span
-          class="material-symbols-outlined"
-          style="font-size: 22px; color: white"
-          >notification_important</span
-        >
-        <h1 style="font-size: 17px; font-weight: 800; color: white">
-          AlertBukavu
-        </h1>
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="logo.png" alt="Logo" style="width:28px;height:28px;border-radius:50%;object-fit:cover" onerror="this.style.display='none'" />
+        <h1 style="font-size:17px;font-weight:800;color:white">AlertBukavu</h1>
       </div>
     </header>
 
-    <section style="background: #840015; padding: 16px 20px 36px">
-      <p style="font-size: 13px; color: rgba(255, 255, 255, 0.8)">
-        Vue d'ensemble des alertes de Bukavu
-      </p>
+    <section class="hero-section" style="padding:16px 20px 36px">
+      <p style="font-size:13px;color:rgba(255,255,255,.8)">Vue d'ensemble des alertes de Bukavu</p>
     </section>
 
-    <main
-      style="
-        max-width: 900px;
-        margin: -20px auto 0;
-        padding: 0 16px 20px;
-        position: relative;
-        z-index: 1;
-      "
-    >
-      <div
-        style="
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
-          margin-bottom: 14px;
-        "
-      >
+    <main style="max-width:900px;margin:-20px auto 0;padding:0 16px 20px;position:relative;z-index:1">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px">
         <div class="stat-card">
-          <span
-            id="statTotal"
-            style="
-              font-size: 36px;
-              font-weight: 800;
-              color: #840015;
-              line-height: 1;
-              margin-bottom: 6px;
-            "
-            >—</span
-          >
-          <span
-            style="
-              font-size: 11px;
-              font-weight: 700;
-              color: #906f6d;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            "
-            >Total</span
-          >
+          <span id="statTotal" style="font-size:36px;font-weight:800;color:#840015;line-height:1;margin-bottom:6px">—</span>
+          <span style="font-size:11px;font-weight:700;color:#906f6d;text-transform:uppercase;letter-spacing:.05em">Total</span>
         </div>
         <div class="stat-card">
-          <span
-            id="statResolues"
-            style="
-              font-size: 36px;
-              font-weight: 800;
-              color: #00c48c;
-              line-height: 1;
-              margin-bottom: 6px;
-            "
-            >—</span
-          >
-          <span
-            style="
-              font-size: 11px;
-              font-weight: 700;
-              color: #906f6d;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            "
-            >Résolues</span
-          >
+          <span id="statResolues" style="font-size:36px;font-weight:800;color:#00c48c;line-height:1;margin-bottom:6px">—</span>
+          <span style="font-size:11px;font-weight:700;color:#906f6d;text-transform:uppercase;letter-spacing:.05em">Résolues</span>
         </div>
-        <div class="stat-card" style="border-color: #ff3d71">
-          <span
-            id="statCritiques"
-            style="
-              font-size: 36px;
-              font-weight: 800;
-              color: #ff3d71;
-              line-height: 1;
-              margin-bottom: 6px;
-            "
-            >—</span
-          >
-          <span
-            style="
-              font-size: 11px;
-              font-weight: 700;
-              color: #906f6d;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            "
-            >Critiques</span
-          >
+        <div class="stat-card" style="border-color:#ff3d71">
+          <span id="statCritiques" style="font-size:36px;font-weight:800;color:#ff3d71;line-height:1;margin-bottom:6px">—</span>
+          <span style="font-size:11px;font-weight:700;color:#906f6d;text-transform:uppercase;letter-spacing:.05em">Critiques</span>
         </div>
         <div class="stat-card">
-          <span
-            id="statQuartier"
-            style="
-              font-size: 18px;
-              font-weight: 800;
-              color: #ff9f43;
-              line-height: 1;
-              margin-bottom: 6px;
-              text-align: center;
-            "
-            >—</span
-          >
-          <span
-            style="
-              font-size: 11px;
-              font-weight: 700;
-              color: #906f6d;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            "
-            >Zone active</span
-          >
-        </div>
-      </div>
-
-      <!-- Catégories -->
-      <div class="section-card">
-        <h2
-          style="
-            font-size: 15px;
-            font-weight: 700;
-            color: #1c1b1b;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          "
-        >
-          <span
-            class="material-symbols-outlined"
-            style="font-size: 18px; color: #840015"
-            >category</span
-          >Par catégorie
-        </h2>
-        <div
-          id="catStats"
-          style="display: flex; flex-direction: column; gap: 14px"
-        >
-          <div class="skeleton" style="height: 28px"></div>
-          <div class="skeleton" style="height: 28px"></div>
-          <div class="skeleton" style="height: 28px"></div>
+          <span id="statQuartier" style="font-size:18px;font-weight:800;color:#ff9f43;line-height:1;margin-bottom:6px;text-align:center">—</span>
+          <span style="font-size:11px;font-weight:700;color:#906f6d;text-transform:uppercase;letter-spacing:.05em">Zone active</span>
         </div>
       </div>
 
       <div class="section-card">
-        <h2
-          style="
-            font-size: 15px;
-            font-weight: 700;
-            color: #1c1b1b;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          "
-        >
-          <span
-            class="material-symbols-outlined"
-            style="font-size: 18px; color: #840015"
-            >warning</span
-          >Par urgence
+        <h2 style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+          <span class="material-symbols-outlined" style="font-size:18px;color:#840015">category</span>Par catégorie
         </h2>
-        <div
-          id="urgStats"
-          style="display: flex; flex-direction: column; gap: 14px"
-        ></div>
+        <div id="catStats" style="display:flex;flex-direction:column;gap:14px">
+          <div class="skeleton" style="height:28px"></div>
+          <div class="skeleton" style="height:28px"></div>
+          <div class="skeleton" style="height:28px"></div>
+        </div>
       </div>
 
       <div class="section-card">
-        <h2
-          style="
-            font-size: 15px;
-            font-weight: 700;
-            color: #1c1b1b;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          "
-        >
-          <span
-            class="material-symbols-outlined"
-            style="font-size: 18px; color: #840015"
-            >location_on</span
-          >Top quartiers
+        <h2 style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+          <span class="material-symbols-outlined" style="font-size:18px;color:#840015">warning</span>Par urgence
         </h2>
-        <div
-          id="quartierStats"
-          style="display: flex; flex-direction: column; gap: 12px"
-        ></div>
+        <div id="urgStats" style="display:flex;flex-direction:column;gap:14px"></div>
+      </div>
+
+      <div class="section-card">
+        <h2 style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+          <span class="material-symbols-outlined" style="font-size:18px;color:#840015">location_on</span>Top quartiers
+        </h2>
+        <div id="quartierStats" style="display:flex;flex-direction:column;gap:12px"></div>
       </div>
     </main>
 
     <nav class="bottom-nav">
-      <a href="index.html" class="nav-item"
-        ><span
-          class="material-symbols-outlined ms-o"
-          style="
-            font-size: 22px;
-            font-variation-settings:
-              &quot;FILL&quot; 0,
-              &quot;wght&quot; 400,
-              &quot;GRAD&quot; 0,
-              &quot;opsz&quot; 24;
-          "
-          >rss_feed</span
-        ><span>Alertes</span></a
-      >
-      <a href="publier.html" class="nav-item"
-        ><span
-          class="material-symbols-outlined ms-o"
-          style="
-            font-size: 22px;
-            font-variation-settings:
-              &quot;FILL&quot; 0,
-              &quot;wght&quot; 400,
-              &quot;GRAD&quot; 0,
-              &quot;opsz&quot; 24;
-          "
-          >add_alert</span
-        ><span>Publier</span></a
-      >
-      <a href="stats.html" class="nav-item active"
-        ><span class="material-symbols-outlined" style="font-size: 22px"
-          >analytics</span
-        ><span>Stats</span></a
-      >
-      <a href="profil.html" class="nav-item"
-        ><span
-          class="material-symbols-outlined ms-o"
-          style="
-            font-size: 22px;
-            font-variation-settings:
-              &quot;FILL&quot; 0,
-              &quot;wght&quot; 400,
-              &quot;GRAD&quot; 0,
-              &quot;opsz&quot; 24;
-          "
-          >person</span
-        ><span>Profil</span></a
-      >
+      <a href="index.html" class="nav-item"><span class="material-symbols-outlined ms-o" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">rss_feed</span><span>Alertes</span></a>
+      <a href="publier.html" class="nav-item"><span class="material-symbols-outlined ms-o" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">add_alert</span><span>Publier</span></a>
+      <a href="stats.html" class="nav-item active"><span class="material-symbols-outlined" style="font-size:22px">analytics</span><span>Stats</span></a>
+      <a href="profil.html" class="nav-item"><span class="material-symbols-outlined ms-o" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">person</span><span>Profil</span></a>
     </nav>
 
     <script src="firebase-config.js"></script>
     <script>
-      requireAuth().then((user) => {
-        afficherMenuAdmin(false, user);
-        chargerStats();
-      });
+      requireAuth().then(user => { afficherMenuAdmin(false, user); chargerStats(); });
 
       function ligne(label, count, total, color) {
-        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+        const pct = total > 0 ? Math.round((count/total)*100) : 0;
         return `<div style="display:flex;align-items:center;gap:12px;">
-    <span style="font-size:13px;font-weight:600;color:#1c1b1b;width:84px;flex-shrink:0;">${label}</span>
-    <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${color};"></div></div>
-    <span style="font-size:13px;font-weight:700;color:#906f6d;width:24px;text-align:right;">${count}</span>
-  </div>`;
+          <span style="font-size:13px;font-weight:600;color:#1a1a1a;width:84px;flex-shrink:0;">${label}</span>
+          <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${color};"></div></div>
+          <span style="font-size:13px;font-weight:700;color:#906f6d;width:24px;text-align:right;">${count}</span>
+        </div>`;
       }
 
       async function chargerStats() {
-        const snap = await db.collection("alertes").get();
-        const alertes = snap.docs.map((d) => d.data());
+        const snap = await db.collection('alertes').get();
+        const alertes = snap.docs.map(d => d.data());
         const total = alertes.length;
-        let resolues = 0,
-          critiques = 0;
-        const parCat = {},
-          parUrg = {},
-          parQ = {};
-
-        alertes.forEach((a) => {
-          if (a.statut === "resolue") resolues++;
-          if (a.niveauUrgence === "critique") critiques++;
-          parCat[a.categorie] = (parCat[a.categorie] || 0) + 1;
-          parUrg[a.niveauUrgence] = (parUrg[a.niveauUrgence] || 0) + 1;
-          parQ[a.quartier] = (parQ[a.quartier] || 0) + 1;
+        let resolues = 0, critiques = 0;
+        const parCat = {}, parUrg = {}, parQ = {};
+        alertes.forEach(a => {
+          if (a.statut === 'resolue') resolues++;
+          if (a.niveauUrgence === 'critique') critiques++;
+          parCat[a.categorie] = (parCat[a.categorie]||0) + 1;
+          parUrg[a.niveauUrgence] = (parUrg[a.niveauUrgence]||0) + 1;
+          parQ[a.quartier] = (parQ[a.quartier]||0) + 1;
         });
-
-        document.getElementById("statTotal").textContent = total;
-        document.getElementById("statResolues").textContent = resolues;
-        document.getElementById("statCritiques").textContent = critiques;
-
-        let topQ = "—",
-          maxQ = 0;
-        Object.entries(parQ).forEach(([q, n]) => {
-          if (n > maxQ) {
-            maxQ = n;
-            topQ = q;
-          }
-        });
-        document.getElementById("statQuartier").textContent = topQ;
-
-        document.getElementById("catStats").innerHTML = Object.entries(
-          CATEGORIES,
-        )
-          .map(([key, cat]) =>
-            ligne(cat.label, parCat[key] || 0, total, cat.color),
-          )
-          .join("");
-
-        document.getElementById("urgStats").innerHTML = Object.entries(URGENCES)
-          .map(([key, urg]) =>
-            ligne(urg.label, parUrg[key] || 0, total, urg.color),
-          )
-          .join("");
-
-        const sortedQ = Object.entries(parQ)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 6);
-        document.getElementById("quartierStats").innerHTML =
-          sortedQ.length > 0
-            ? sortedQ.map(([q, n]) => ligne(q, n, total, "#840015")).join("")
-            : '<p style="color:#906f6d;font-size:13px;text-align:center;padding:12px 0;">Aucune donnée</p>';
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statResolues').textContent = resolues;
+        document.getElementById('statCritiques').textContent = critiques;
+        let topQ = '—', maxQ = 0;
+        Object.entries(parQ).forEach(([q,n]) => { if (n > maxQ) { maxQ = n; topQ = q; } });
+        document.getElementById('statQuartier').textContent = topQ;
+        document.getElementById('catStats').innerHTML = Object.entries(CATEGORIES).map(([key,cat]) => ligne(cat.label, parCat[key]||0, total, cat.color)).join('');
+        document.getElementById('urgStats').innerHTML = Object.entries(URGENCES).map(([key,urg]) => ligne(urg.label, parUrg[key]||0, total, urg.color)).join('');
+        const sortedQ = Object.entries(parQ).sort((a,b) => b[1]-a[1]).slice(0,6);
+        document.getElementById('quartierStats').innerHTML = sortedQ.length > 0
+          ? sortedQ.map(([q,n]) => ligne(q, n, total, '#840015')).join('')
+          : '<p style="color:#906f6d;font-size:13px;text-align:center;padding:12px 0;">Aucune donnée</p>';
       }
     </script>
   </body>

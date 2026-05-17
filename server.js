@@ -1,8 +1,39 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const nodemailer = require('nodemailer');
 const admin = require('firebase-admin');
+
+function loadLocalEnv() {
+  const envPath = path.join(__dirname, '.env');
+  if (!fs.existsSync(envPath)) return;
+
+  const lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+
+    const separatorIndex = trimmed.indexOf('=');
+    if (separatorIndex === -1) continue;
+
+    const key = trimmed.slice(0, separatorIndex).trim();
+    let value = trimmed.slice(separatorIndex + 1).trim();
+
+    if (
+      (value.startsWith('"') && value.endsWith('"'))
+      || (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+
+    if (!process.env[key]) {
+      process.env[key] = value;
+    }
+  }
+}
+
+loadLocalEnv();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,14 +45,37 @@ function initFirebaseAdmin() {
   if (admin.apps.length) return;
 
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
     admin.initializeApp({
-      credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON))
+      credential: admin.credential.cert(serviceAccount),
+      projectId: serviceAccount.project_id
     });
     return;
   }
 
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+    const serviceAccountPath = path.resolve(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+    const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      projectId: serviceAccount.project_id
+    });
+    return;
+  }
+
+  const projectId = process.env.FIREBASE_PROJECT_ID
+    || process.env.GOOGLE_CLOUD_PROJECT
+    || process.env.GCLOUD_PROJECT;
+
+  if (!projectId && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    throw new Error(
+      'Firebase Admin non configure. Ajoute FIREBASE_SERVICE_ACCOUNT_JSON ou FIREBASE_SERVICE_ACCOUNT_PATH dans tes variables d environnement.'
+    );
+  }
+
   admin.initializeApp({
-    credential: admin.credential.applicationDefault()
+    credential: admin.credential.applicationDefault(),
+    projectId
   });
 }
 

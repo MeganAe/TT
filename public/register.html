@@ -3,499 +3,119 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Créez votre compte AlertBukavu et rejoignez la communauté d'alertes de Bukavu, RDC." />
     <title>AlertBukavu — Inscription</title>
+    <link rel="icon" type="image/png" href="logo.png" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://www.hCaptcha.com/1/api.js" async defer></script>
     <link rel="stylesheet" href="style.css" />
     <style>
-      .material-symbols-outlined {
-        font-variation-settings:
-          "FILL" 0,
-          "wght" 400,
-          "GRAD" 0,
-          "opsz" 24;
-      }
-
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        overflow: hidden;
-      }
-
-      .bg-wrap {
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-      }
-      .bg-wrap img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        filter: brightness(0.8) saturate(0.5);
-        animation: bgZoom 20s ease-in-out infinite alternate;
-        transform-origin: center;
-      }
-      @keyframes bgZoom {
-        from {
-          transform: scale(1);
-        }
-        to {
-          transform: scale(1.06);
-        }
-      }
-      .bg-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          to bottom,
-          rgba(0, 0, 0, 0.2),
-          rgba(0, 0, 0, 0.05) 40%,
-          rgba(0, 0, 0, 0.5)
-        );
-      }
-
-      .scroll-area {
-        position: relative;
-        z-index: 10;
-        height: 100%;
-        overflow-y: auto;
-        display: flex;
-        align-items: flex-start;
-        justify-content: center;
-        padding: 40px 20px;
-        -webkit-overflow-scrolling: touch;
-      }
-      .scroll-area::-webkit-scrollbar {
-        display: none;
-      }
-
-      .card-reg {
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
-        padding: 52px 28px 28px;
-        position: relative;
-        width: 100%;
-        max-width: 420px;
-        animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-        margin-bottom: 20px;
-      }
-      @keyframes cardIn {
-        from {
-          opacity: 0;
-          transform: translateY(32px) scale(0.97);
-        }
-        to {
-          opacity: 1;
-          transform: none;
-        }
-      }
-
-      .floating-logo {
-        position: absolute;
-        top: -52px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 104px;
-        height: 104px;
-        background: white;
-        border-radius: 50%;
-        padding: 9px;
-        box-shadow: 0 6px 28px rgba(132, 0, 21, 0.28);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .input-wrap {
-        position: relative;
-        margin-bottom: 12px;
-      }
-      .input-wrap .ico {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 18px;
-        color: #906f6d;
-        pointer-events: none;
-        transition: color 0.2s;
-      }
-      .field-input {
-        width: 100%;
-        height: 50px;
-        padding: 0 16px 0 48px;
-        background: #f6f3f2;
-        border: 1.5px solid #e4bdbb;
-        border-radius: 10px;
-        font-size: 14px;
-        font-family: "Inter", sans-serif;
-        color: #1c1b1b;
-        outline: none;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-        box-sizing: border-box;
-      }
-      .field-input:focus {
-        border-color: #840015;
-        box-shadow: 0 0 0 3px rgba(132, 0, 21, 0.1);
-        background: white;
-      }
-      .field-input:focus ~ .ico {
-        color: #840015;
-      }
-      .field-input::placeholder {
-        color: rgba(91, 64, 62, 0.45);
-      }
-
-      .tel-wrap {
-        position: relative;
-        margin-bottom: 4px;
-      }
-      .tel-prefix {
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 76px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #ffdad8;
-        border: 1.5px solid #e4bdbb;
-        border-right: none;
-        border-radius: 10px 0 0 10px;
-        font-size: 14px;
-        font-weight: 700;
-        color: #840015;
-        pointer-events: none;
-        user-select: none;
-      }
-      .tel-input {
-        width: 100%;
-        height: 50px;
-        padding: 0 16px 0 84px;
-        background: #f6f3f2;
-        border: 1.5px solid #e4bdbb;
-        border-radius: 10px;
-        font-size: 14px;
-        font-family: "Inter", sans-serif;
-        color: #1c1b1b;
-        outline: none;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-        box-sizing: border-box;
-      }
-      .tel-input:focus {
-        border-color: #840015;
-        box-shadow: 0 0 0 3px rgba(132, 0, 21, 0.1);
-        background: white;
-      }
-      .tel-input::placeholder {
-        color: rgba(91, 64, 62, 0.45);
-      }
+      html,body{height:100%;margin:0;overflow:hidden}
+      .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
     </style>
   </head>
   <body>
-    <div class="bg-wrap">
-      <img
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMcZwNH9PaJycSQXZPnZC-_HSOTENwx0QNNE7-4uorlL8q6YbeNsaaRuiDlYXrtpzBFiZ5E6J0rXyqZmzmcGw_WsgzFEogYb16b833tuTIMJZ_MnJG-QiQqOj74IXsOK0b5CyshKxyqeTxWCyw9CK07WSrQruhyFVg7g08QNa1_ZkyN8KS3ckEP-UyucX2a8DrVeicBPEpSR8JX3nTnJ1tQCY-VGpaMlLDOZ31Bf2qGV2KZjQZCZt46bDQGhnSQuWP5xd7rlY0SYTz"
-        alt="Bukavu"
-      />
-      <div class="bg-overlay"></div>
+    <div class="auth-bg">
+      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMcZwNH9PaJycSQXZPnZC-_HSOTENwx0QNNE7-4uorlL8q6YbeNsaaRuiDlYXrtpzBFiZ5E6J0rXyqZmzmcGw_WsgzFEogYb16b833tuTIMJZ_MnJG-QiQqOj74IXsOK0b5CyshKxyqeTxWCyw9CK07WSrQruhyFVg7g08QNa1_ZkyN8KS3ckEP-UyucX2a8DrVeicBPEpSR8JX3nTnJ1tQCY-VGpaMlLDOZ31Bf2qGV2KZjQZCZt46bDQGhnSQuWP5xd7rlY0SYTz" alt="Bukavu" />
+      <div class="auth-overlay"></div>
     </div>
 
-    <div class="scroll-area">
-      <div
-        style="
-          width: 100%;
-          max-width: 420px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        "
-      >
-        <div class="card-reg">
+    <div class="auth-scroll" style="align-items:flex-start">
+      <div style="width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center">
+        <div class="glass-card" style="margin-bottom:20px">
           <div class="floating-logo">
-            <div
-              class="logo-pulse"
-              style="
-                width: 100%;
-                height: 100%;
-                border: 3px solid #840015;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
-            >
-              <span
-                class="material-symbols-outlined"
-                style="
-                  color: #840015;
-                  font-size: 46px;
-                  font-variation-settings:
-                    &quot;FILL&quot; 1,
-                    &quot;wght&quot; 700,
-                    &quot;GRAD&quot; 0,
-                    &quot;opsz&quot; 48;
-                "
-                >notification_important</span
-              >
-            </div>
+            <img src="logo.png" alt="AlertBukavu Logo" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\'logo-pulse\' style=\'width:100%;height:100%;border:3px solid #840015;border-radius:50%;display:flex;align-items:center;justify-content:center\'><span class=\'material-symbols-outlined\' style=\'color:#840015;font-size:46px;font-variation-settings:&quot;FILL&quot; 1,&quot;wght&quot; 700,&quot;GRAD&quot; 0,&quot;opsz&quot; 48\'>notification_important</span></div>'" />
           </div>
 
-          <div style="text-align: center; margin-bottom: 20px">
-            <h1
-              style="
-                font-size: 22px;
-                font-weight: 800;
-                color: #840015;
-                margin-bottom: 4px;
-              "
-            >
-              Créer un compte
-            </h1>
-            <p style="font-size: 13px; color: #5b403e">
-              Rejoignez la communauté AlertBukavu
-            </p>
+          <div style="text-align:center;margin-bottom:20px">
+            <h1 style="font-size:22px;font-weight:800;color:#840015;margin-bottom:4px">Créer un compte</h1>
+            <p style="font-size:13px;color:#5b403e">Rejoignez la communauté AlertBukavu</p>
           </div>
 
           <form onsubmit="return false;">
             <div class="input-wrap">
-              <input
-                id="nom"
-                type="text"
-                class="field-input"
-                placeholder="Nom complet"
-              />
+              <input id="nom" type="text" class="field-input" placeholder="Nom complet" />
               <span class="material-symbols-outlined ico">badge</span>
             </div>
 
-            <div class="input-wrap" style="margin-bottom: 4px">
-              <input
-                id="username"
-                type="text"
-                class="field-input"
-                placeholder="Nom d'utilisateur"
-                maxlength="20"
-                oninput="verifierUsername(this.value)"
-                autocomplete="username"
-              />
+            <div class="input-wrap" style="margin-bottom:4px">
+              <input id="username" type="text" class="field-input" placeholder="Nom d'utilisateur" maxlength="20" oninput="verifierUsername(this.value)" autocomplete="username" />
               <span class="material-symbols-outlined ico">alternate_email</span>
             </div>
-            <p
-              id="usernameStatus"
-              style="
-                font-size: 11px;
-                margin-bottom: 12px;
-                padding-left: 4px;
-                min-height: 16px;
-              "
-            ></p>
+            <p id="usernameStatus" style="font-size:11px;margin-bottom:12px;padding-left:4px;min-height:16px"></p>
 
             <div class="input-wrap">
-              <input
-                id="email"
-                type="email"
-                class="field-input"
-                placeholder="Adresse email"
-                autocomplete="email"
-              />
+              <input id="email" type="email" class="field-input" placeholder="Adresse email" autocomplete="email" />
               <span class="material-symbols-outlined ico">mail</span>
             </div>
 
             <div class="tel-wrap">
               <div class="tel-prefix">+243</div>
-              <input
-                id="telephone"
-                type="tel"
-                class="tel-input"
-                placeholder="812 345 678"
-                oninput="formatTelephone(this)"
-                inputmode="numeric"
-              />
+              <input id="telephone" type="tel" class="tel-input" placeholder="812 345 678" oninput="formatTelephone(this)" inputmode="numeric" />
             </div>
-            <p
-              id="telStatus"
-              style="
-                font-size: 11px;
-                margin-bottom: 12px;
-                padding-left: 4px;
-                min-height: 16px;
-              "
-            ></p>
+            <p id="telStatus" style="font-size:11px;margin-bottom:12px;padding-left:4px;min-height:16px"></p>
 
-            <div class="input-wrap" style="margin-bottom: 12px">
-              <select
-                id="quartier"
-                class="field-input"
-                style="appearance: none; padding-right: 36px; cursor: pointer"
-              >
+            <div class="input-wrap" style="margin-bottom:12px">
+              <select id="quartier" class="field-input" style="appearance:none;padding-right:36px;cursor:pointer">
                 <option value="">Votre quartier...</option>
               </select>
               <span class="material-symbols-outlined ico">location_on</span>
-              <span
-                class="material-symbols-outlined"
-                style="
-                  position: absolute;
-                  right: 12px;
-                  top: 50%;
-                  transform: translateY(-50%);
-                  font-size: 18px;
-                  color: #906f6d;
-                  pointer-events: none;
-                  font-variation-settings:
-                    &quot;FILL&quot; 0,
-                    &quot;wght&quot; 400,
-                    &quot;GRAD&quot; 0,
-                    &quot;opsz&quot; 24;
-                "
-                >expand_more</span
-              >
+              <span class="material-symbols-outlined" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:18px;color:#906f6d;pointer-events:none">expand_more</span>
             </div>
 
-            <div class="input-wrap" style="margin-bottom: 4px">
-              <input
-                id="password"
-                type="password"
-                class="field-input"
-                placeholder="Mot de passe (min. 8 car.)"
-                style="padding-right: 48px"
-                oninput="updateStrength(this.value)"
-                autocomplete="new-password"
-              />
+            <div class="input-wrap" style="margin-bottom:4px">
+              <input id="password" type="password" class="field-input" placeholder="Mot de passe (min. 8 car.)" style="padding-right:48px" oninput="updateStrength(this.value)" autocomplete="new-password" />
               <span class="material-symbols-outlined ico">vpn_key</span>
-              <button
-                type="button"
-                onclick="togglePwd()"
-                style="
-                  position: absolute;
-                  right: 14px;
-                  top: 50%;
-                  transform: translateY(-50%);
-                  background: none;
-                  border: none;
-                  cursor: pointer;
-                  color: #906f6d;
-                "
-              >
-                <span
-                  class="material-symbols-outlined"
-                  id="eyeIcon"
-                  style="font-size: 18px"
-                  >visibility</span
-                >
+              <button type="button" onclick="togglePwd()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#906f6d">
+                <span class="material-symbols-outlined" id="eyeIcon" style="font-size:18px">visibility</span>
               </button>
             </div>
 
-            <div
-              style="
-                height: 4px;
-                border-radius: 2px;
-                background: #f0eded;
-                margin-bottom: 16px;
-                overflow: hidden;
-              "
-            >
-              <div
-                id="pwdFill"
-                style="
-                  height: 100%;
-                  width: 0%;
-                  border-radius: 2px;
-                  transition: all 0.3s;
-                "
-              ></div>
+            <div style="height:4px;border-radius:2px;background:#f0eded;margin-bottom:16px;overflow:hidden">
+              <div id="pwdFill" style="height:100%;width:0%;border-radius:2px;transition:all .3s"></div>
             </div>
 
-            <button
-              type="button"
-              id="btnReg"
-              class="btn-primary"
-              onclick="register()"
-              style="height: 52px; font-size: 15px; border-radius: 10px"
-            >
+            <!-- hCaptcha -->
+            <div class="captcha-wrap">
+              <div class="h-captcha" data-sitekey="6b5a506e-395a-46d0-8bba-77941038b772" data-callback="onCaptchaSuccess" data-expired-callback="onCaptchaExpire"></div>
+            </div>
+
+            <button type="button" id="btnReg" class="btn-primary" onclick="register()" style="margin-top:12px">
               CRÉER MON COMPTE
-              <span
-                class="material-symbols-outlined"
-                style="
-                  font-size: 18px;
-                  color: white;
-                  font-variation-settings:
-                    &quot;FILL&quot; 1,
-                    &quot;wght&quot; 400,
-                    &quot;GRAD&quot; 0,
-                    &quot;opsz&quot; 48;
-                "
-                >arrow_forward</span
-              >
+              <span class="material-symbols-outlined" style="font-size:18px;color:white;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48">arrow_forward</span>
             </button>
           </form>
 
-          <div style="margin-top: 16px; text-align: center">
-            <a
-              href="login.html"
-              style="
-                font-size: 13px;
-                font-weight: 600;
-                color: #840015;
-                text-decoration: underline;
-                text-underline-offset: 3px;
-              "
-            >
-              Déjà un compte ? Se connecter
-            </a>
+          <div style="margin-top:16px;text-align:center">
+            <a href="login.html" style="font-size:13px;font-weight:600;color:#840015;text-decoration:underline;text-underline-offset:3px">Déjà un compte ? Se connecter</a>
           </div>
         </div>
 
-        <p
-          style="
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 11px;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-            margin-bottom: 20px;
-          "
-        >
-          AlertBukavu • Réseau communautaire • Bukavu, RDC
-        </p>
+        <p class="auth-footer" style="margin-bottom:20px">AlertBukavu • Réseau communautaire • Bukavu, RDC</p>
       </div>
     </div>
 
     <script src="firebase-config.js"></script>
     <script>
-      auth.onAuthStateChanged((user) => {
-        if (user) window.location.href = "index.html";
-      });
+      let captchaValidated = false;
+      function onCaptchaSuccess(token) { captchaValidated = true; }
+      function onCaptchaExpire() { captchaValidated = false; }
 
-      const sel = document.getElementById("quartier");
-      QUARTIERS.forEach((q) => {
-        const o = document.createElement("option");
-        o.value = q;
-        o.textContent = q;
-        sel.appendChild(o);
-      });
+      auth.onAuthStateChanged(user => { if (user) window.location.href = 'index.html'; });
+
+      const sel = document.getElementById('quartier');
+      QUARTIERS.forEach(q => { const o = document.createElement('option'); o.value = q; o.textContent = q; sel.appendChild(o); });
 
       function togglePwd() {
-        const i = document.getElementById("password");
-        const ic = document.getElementById("eyeIcon");
-        i.type = i.type === "password" ? "text" : "password";
-        ic.textContent =
-          i.type === "password" ? "visibility" : "visibility_off";
+        const i = document.getElementById('password'), ic = document.getElementById('eyeIcon');
+        i.type = i.type === 'password' ? 'text' : 'password';
+        ic.textContent = i.type === 'password' ? 'visibility' : 'visibility_off';
       }
 
       function updateStrength(pwd) {
@@ -504,144 +124,76 @@
         if (/[A-Z]/.test(pwd)) s++;
         if (/[0-9]/.test(pwd)) s++;
         if (/[^A-Za-z0-9]/.test(pwd)) s++;
-        const cols = ["#FF3D71", "#FF9F43", "#FFD43B", "#00C48C"];
-        const w = ["25%", "50%", "75%", "100%"];
-        const f = document.getElementById("pwdFill");
-        f.style.width = s > 0 ? w[s - 1] : "0%";
-        f.style.background = s > 0 ? cols[s - 1] : "";
+        const cols = ['#FF3D71','#FF9F43','#FFD43B','#00C48C'];
+        const w = ['25%','50%','75%','100%'];
+        const f = document.getElementById('pwdFill');
+        f.style.width = s > 0 ? w[s-1] : '0%';
+        f.style.background = s > 0 ? cols[s-1] : '';
       }
 
       function formatTelephone(input) {
-        let val = input.value.trim();
-        const status = document.getElementById("telStatus");
-        if (val.length === 0) {
-          status.textContent = "";
-          return;
-        }
-        status.textContent = "Numéro accepté";
-        status.style.color = "#00C48C";
+        const status = document.getElementById('telStatus');
+        if (!input.value.trim().length) { status.textContent = ''; return; }
+        status.textContent = 'Numéro accepté';
+        status.style.color = '#00C48C';
       }
 
       let usernameTimer;
       async function verifierUsername(val) {
-        const status = document.getElementById("usernameStatus");
+        const status = document.getElementById('usernameStatus');
         clearTimeout(usernameTimer);
-        if (!val) {
-          status.textContent = "";
-          return;
-        }
-        if (!validerUsername(val)) {
-          status.textContent = "3-20 caractères, lettres/chiffres/_";
-          status.style.color = "#FF3D71";
-          return;
-        }
-        status.textContent = "Vérification...";
-        status.style.color = "#906f6d";
+        if (!val) { status.textContent = ''; return; }
+        if (!validerUsername(val)) { status.textContent = '3-20 caractères, lettres/chiffres/_'; status.style.color = '#FF3D71'; return; }
+        status.textContent = 'Vérification...'; status.style.color = '#906f6d';
         usernameTimer = setTimeout(async () => {
           const dispo = await usernameDisponible(val);
-          status.textContent = dispo
-            ? "@" + val + " est disponible"
-            : "@" + val + " est déjà pris";
-          status.style.color = dispo ? "#00C48C" : "#FF3D71";
+          status.textContent = dispo ? '@' + val + ' est disponible' : '@' + val + ' est déjà pris';
+          status.style.color = dispo ? '#00C48C' : '#FF3D71';
         }, 600);
       }
 
       async function register() {
-        const nom = document.getElementById("nom").value.trim();
-        const username = document
-          .getElementById("username")
-          .value.trim()
-          .toLowerCase();
-        const email = document.getElementById("email").value.trim();
-        const telRaw = document.getElementById("telephone").value.trim();
-        const telephone = telRaw.startsWith("+243")
-          ? telRaw
-          : "+243" + telRaw.replace(/\D/g, "");
-        const quartier = document.getElementById("quartier").value;
-        const password = document.getElementById("password").value;
-        const btn = document.getElementById("btnReg");
+        const nom = document.getElementById('nom').value.trim();
+        const username = document.getElementById('username').value.trim().toLowerCase();
+        const email = document.getElementById('email').value.trim();
+        const telRaw = document.getElementById('telephone').value.trim();
+        const telephone = telRaw.startsWith('+243') ? telRaw : '+243' + telRaw.replace(/\D/g, '');
+        const quartier = document.getElementById('quartier').value;
+        const password = document.getElementById('password').value;
+        const btn = document.getElementById('btnReg');
 
-        if (!nom) {
-          showToast("Le nom est requis", "error");
-          return;
-        }
-        if (!validerUsername(username)) {
-          showToast(
-            "Nom d'utilisateur invalide (3-20 car., lettres/chiffres/_)",
-            "error",
-          );
-          return;
-        }
-        if (!email) {
-          showToast("L'email est requis", "error");
-          return;
-        }
-        if (!telRaw) {
-          showToast("Le numéro de téléphone est requis", "error");
-          return;
-        }
-        if (!quartier) {
-          showToast("Choisissez votre quartier", "error");
-          return;
-        }
-        if (password.length < 8) {
-          showToast("Mot de passe trop court (min. 8 car.)", "error");
-          return;
-        }
+        if (!nom) { showToast('Le nom est requis', 'error'); return; }
+        if (!validerUsername(username)) { showToast("Nom d'utilisateur invalide (3-20 car., lettres/chiffres/_)", 'error'); return; }
+        if (!email) { showToast("L'email est requis", 'error'); return; }
+        if (!telRaw) { showToast('Le numéro de téléphone est requis', 'error'); return; }
+        if (!quartier) { showToast('Choisissez votre quartier', 'error'); return; }
+        if (password.length < 8) { showToast('Mot de passe trop court (min. 8 car.)', 'error'); return; }
+        if (!captchaValidated) { showToast('Veuillez valider le captcha', 'error'); return; }
 
         const dispo = await usernameDisponible(username);
-        if (!dispo) {
-          showToast("Ce nom d'utilisateur est déjà pris", "error");
-          return;
-        }
+        if (!dispo) { showToast("Ce nom d'utilisateur est déjà pris", 'error'); return; }
 
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span>&nbsp;Création...';
 
         try {
-          const result = await auth.createUserWithEmailAndPassword(
-            email,
-            password,
-          );
+          const result = await auth.createUserWithEmailAndPassword(email, password);
           const uid = result.user.uid;
-
-          const photoUrl = null;
-
-          await db.collection("users").doc(uid).set({
-            nom,
-            username,
-            email,
-            telephone,
-            quartier,
-            photoUrl,
-            estBloque: false,
-            nbAlertes: 0,
-            nbConfirmations: 0,
-            nbFaussesAlertes: 0,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          await db.collection('users').doc(uid).set({
+            nom, username, email, telephone, quartier,
+            photoUrl: null, estBloque: false,
+            nbAlertes: 0, nbConfirmations: 0, nbFaussesAlertes: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-
-          await db.collection("usernames").doc(username).set({ uid, email });
-
-          await Swal.fire({
-            icon: "success",
-            title: "Compte créé !",
-            text: `Bienvenue sur AlertBukavu, @${username} !`,
-            confirmButtonColor: "#840015",
-            confirmButtonText: "Commencer",
-          });
-
-          window.location.href = "index.html";
+          await db.collection('usernames').doc(username).set({ uid, email });
+          await Swal.fire({ icon: 'success', title: 'Compte créé !', text: `Bienvenue sur AlertBukavu, @${username} !`, confirmButtonColor: '#840015', confirmButtonText: 'Commencer' });
+          window.location.href = 'index.html';
         } catch (e) {
           btn.disabled = false;
-          btn.innerHTML =
-            "CRÉER MON COMPTE <span class=\"material-symbols-outlined\" style=\"font-size:18px;color:white;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;\">arrow_forward</span>";
-          const msgs = {
-            "auth/email-already-in-use": "Cet email est déjà utilisé.",
-            "auth/invalid-email": "Adresse email invalide.",
-            "auth/weak-password": "Mot de passe trop faible.",
-          };
-          showToast(msgs[e.code] || "Erreur : " + e.message, "error");
+          btn.innerHTML = "CRÉER MON COMPTE <span class=\"material-symbols-outlined\" style=\"font-size:18px;color:white;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;\">arrow_forward</span>";
+          if (typeof hcaptcha !== 'undefined') { hcaptcha.reset(); captchaValidated = false; }
+          const msgs = { 'auth/email-already-in-use': 'Cet email est déjà utilisé.', 'auth/invalid-email': 'Adresse email invalide.', 'auth/weak-password': 'Mot de passe trop faible.' };
+          showToast(msgs[e.code] || 'Erreur : ' + e.message, 'error');
         }
       }
     </script>

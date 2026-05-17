@@ -11,8 +11,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Les proprietaires/admins principaux sont definis ici directement dans le code.
-// Remplace les valeurs vides par les UID Firebase Auth des 5 comptes proprietaires.
 const ADMIN_UIDS = [
     'xofFgfRyh8QdhMp8fUYNfKrFv843',
     '',
